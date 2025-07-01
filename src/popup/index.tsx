@@ -1,7 +1,7 @@
-import { Main } from "~components/main"
+import { Main } from '@/components/main'
 
-function IndexPopup() {
-  return <Main />
+const IndexPopup = () => {
+    return <Main />
 }
 
 export default IndexPopup
