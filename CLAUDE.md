@@ -11,21 +11,30 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## プロジェクト概要
 
-このプロジェクトは、Plasmoフレームワークを使用したChrome拡張機能「Github navigator」です。Plasmo v0.90.5とNext.js 15.3.4、React 19を組み合わせて、モダンなReactベースの拡張機能を構築しています。
+このプロジェクトは、Plasmoフレームワークを使用したChrome拡張機能「Github navigator」です。Plasmo v0.90.5とNext.js 15.3.5、React 19.1.0を組み合わせて、モダンなReactベースの拡張機能を構築しています。
 
 ### 技術スタック
 
 - **フレームワーク**: Plasmo v0.90.5（Chrome拡張機能開発）
-- **UI**: React 19 + Next.js 15.3.4
+- **UI**: React 19.1.0 + Next.js 15.3.5
 - **スタイリング**: Tailwind CSS v4.1.11
-- **UI コンポーネントシステム**: shadcn/ui（New York スタイル、46コンポーネント導入済み）
+- **UI コンポーネントシステム**: shadcn/ui（New York スタイル、45コンポーネント導入済み）
+- **リサイザブル**: react-resizable-panels v3.0.3
 - **ベースコンポーネント**: Radix UI（Dialog, Popover, Scroll Area, Tabs等）
-- **アイコン**: Lucide React
-- **テーマ管理**: next-themes（システム/ダーク/ライトモード対応）
-- **コマンドパレット**: cmdk
-- **ユーティリティ**: clsx + tailwind-merge
+- **アイコン**: Lucide React v0.525.0
+- **テーマ管理**: next-themes v0.4.6（システム/ダーク/ライトモード対応）
+- **コマンドパレット**: cmdk v1.1.1
+- **チャート**: recharts v2.15.4
+- **日付処理**: date-fns v4.1.0
+- **フォーム管理**: react-hook-form v7.60.0 + hookform/resolvers v5.1.1
+- **通知**: sonner v2.0.6
+- **バリデーション**: zod v4.0.5
+- **カルーセル**: embla-carousel-react v8.6.0
+- **ドロワー**: vaul v1.1.2
+- **OTP入力**: input-otp v1.4.2
+- **ユーティリティ**: clsx v2.1.1 + tailwind-merge v3.3.1
 - **TypeScript**: v5.8.3
-- **パッケージマネージャー**: pnpm v10.12.4
+- **パッケージマネージャー**: pnpm v10.13.1
 
 ## 開発コマンド
 
@@ -185,13 +194,15 @@ TypeScript (`tsconfig.json`) とshadcn/ui (`components.json`) で以下のパス
 
 ### 利用可能なshadcn/uiコンポーネント
 
-現在46のコンポーネントが導入済み：
+現在45のコンポーネントが導入済み：
 
 - **基本**: Button, Badge, Avatar, Separator, Skeleton等
 - **フォーム**: Input, Textarea, Select, Checkbox, Switch, Slider等
 - **ナビゲーション**: Breadcrumb, Pagination, Tabs, Command等
-- **表示**: Card, Alert, Dialog, Popover, Tooltip, Table等
-- **レイアウト**: ScrollArea, Resizable, Collapsible等
+- **表示**: Card, Alert, Dialog, Popover, Tooltip, Table, Calendar, Carousel等
+- **レイアウト**: ScrollArea, Resizable, Collapsible, Sidebar, Sheet, Drawer等
+- **入力**: Input, Textarea, Select, Checkbox, Switch, Slider, InputOTP等
+- **フィードバック**: Progress, Alert, Sonner（トースト通知）等
 
 新しいコンポーネントが必要な場合は `pnpm dlx shadcn@latest add [component-name]` で追加可能。
 
