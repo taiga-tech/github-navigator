@@ -4,6 +4,8 @@ import type { PropsWithChildren } from 'react'
 
 import { ThemeProvider as NextThemesProvider } from 'next-themes'
 
+import { Toaster } from '@/components/ui/sonner'
+
 export const Providers = ({ children }: Readonly<PropsWithChildren>) => {
     return (
         <NextThemesProvider
@@ -14,6 +16,7 @@ export const Providers = ({ children }: Readonly<PropsWithChildren>) => {
             enableColorScheme
         >
             {children}
+            <Toaster />
         </NextThemesProvider>
     )
 }

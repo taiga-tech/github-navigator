@@ -21,7 +21,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - **UI コンポーネントシステム**: shadcn/ui（New York スタイル、45コンポーネント導入済み）
 - **リサイザブル**: react-resizable-panels v3.0.3
 - **ベースコンポーネント**: Radix UI（Dialog, Popover, Scroll Area, Tabs等）
-- **アイコン**: Lucide React v0.525.0
+- **アイコン**: Lucide React v0.525.0 + Octicons React v19.15.3（GitHub公式）
 - **テーマ管理**: next-themes v0.4.6（システム/ダーク/ライトモード対応）
 - **コマンドパレット**: cmdk v1.1.1
 - **チャート**: recharts v2.15.4
@@ -40,47 +40,50 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 **重要**: 全てのコマンドは pnpm を使用してください。
 
-### 開発環境の起動
+### デュアル開発サーバー
 
 ```bash
 pnpm dev
 ```
 
-Plasmoの開発サーバー（ポート3000）とNext.jsの開発サーバー（ポート1947）を並行して起動します。
+以下を並行実行：
+
+- **Plasmo開発サーバー**: `localhost:3000` (Chrome拡張機能)
+- **Next.js開発サーバー**: `localhost:1947` (Webアプリ)
+
+拡張機能のテストは `build/chrome-mv3-dev` をChromeで読み込み。
 
 ### ビルド
 
 ```bash
+# 本番ビルド（拡張機能 + Next.jsアプリ）
 pnpm build
+
+# 個別ビルド
+pnpm build:plasmo  # 拡張機能のみ → build/chrome-mv3-prod
+pnpm build:next    # Next.jsアプリのみ
 ```
 
-Plasmoと Next.jsの両方の本番ビルドを作成します。拡張機能は `build/chrome-mv3-prod` に出力されます。
-
-### 型チェック
+### コード品質チェック
 
 ```bash
+# TypeScript型チェック
 pnpm exec tsc --noEmit
+
+# ESLint（設定：eslint.config.js）
+pnpm lint          # チェックのみ
+pnpm lint:fix      # 自動修正
+
+# Prettier（自動インポート順序整理）
+pnpm format        # 全ファイル
 ```
 
-### コードフォーマット
+### Next.jsサーバー
 
 ```bash
-pnpm format
+# 本番サーバー起動
+pnpm start
 ```
-
-または手動で：
-
-```bash
-pnpm exec prettier --write .
-```
-
-### ESLint
-
-設定ファイル: `eslint.config.js`
-
-- TypeScript/TSXファイル用のルール設定
-- 未使用変数の検出（`_` プレフィックスで無視可能）
-- Chrome拡張機能用のグローバル変数設定済み
 
 ### shadcn/ui コンポーネント追加
 
@@ -134,7 +137,9 @@ pnpm dlx shadcn@latest add button --overwrite
 - `src/popup/index.tsx` - 拡張機能のポップアップエントリーポイント
 - `src/components/main.tsx` - メインコンポーネント（ポップアップとNext.jsアプリで共有）
 - `src/components/providers.tsx` - テーマプロバイダー（next-themes）
-- `src/components/ui/` - shadcn/ui コンポーネント（46コンポーネント導入済み）
+- `src/components/ui/` - shadcn/ui コンポーネント（45コンポーネント導入済み）
+- `src/components/github/` - GitHub風カスタムコンポーネント（8コンポーネント）
+- `src/components/demo/` - デモ用ショーケース（4コンポーネント）
 - `src/hooks/use-mobile.ts` - モバイル検出カスタムフック
 - `src/lib/utils.ts` - ユーティリティ関数（cn関数など）
 - `src/app/` - Next.jsアプリケーション用ディレクトリ
@@ -204,7 +209,113 @@ TypeScript (`tsconfig.json`) とshadcn/ui (`components.json`) で以下のパス
 - **入力**: Input, Textarea, Select, Checkbox, Switch, Slider, InputOTP等
 - **フィードバック**: Progress, Alert, Sonner（トースト通知）等
 
+### GitHubコンポーネント（8コンポーネント）
+
+`src/components/github/` に実装済み：
+
+- **Alert**: GitHub風アラートコンポーネント（success/warning/danger/info）
+- **Button**: GitHub風ボタン（primary/secondary/outline/danger）
+- **Card**: GitHub風カード（ステータス表示対応）
+- **ColorSwatch**: カラーパレット表示
+- **FileExplorer**: ファイルツリー表示（Octicons使用）
+- **IssueItem**: Issue一覧アイテム（ラベル、ステータス）
+- **RepoCard**: リポジトリカード（言語、スター数、visibility）
+- **ThemeToggle**: ダーク/ライトモード切り替え（SSR対応）
+
 新しいコンポーネントが必要な場合は `pnpm dlx shadcn@latest add [component-name]` で追加可能。
+
+## GitHub Primerデザインシステム設定
+
+このプロジェクトは、GitHub公式のPrimerデザインシステムを適用済みです。
+
+### カラーパレット
+
+**ライトテーマ:**
+
+- Background: `#ffffff` (白)
+- Foreground: `#1f2328` (ダークグレー)
+- Primary: `#0969da` (ブルー)
+- Card: `#f6f8fa` (ライトグレー)
+- Border: `#d1d9e0` (グレー)
+
+**ダークテーマ:**
+
+- Background: `#0d1117` (ダーク)
+- Foreground: `#f0f6fc` (ライト)
+- Primary: `#58a6ff` (ライトブルー)
+- Card: `#161b22` (ダークグレー)
+- Border: `#30363d` (グレー)
+
+### Octiconsアイコン使用法
+
+GitHub公式のOcticonsアイコンを使用可能：
+
+```tsx
+import { MarkGithubIcon, StarFillIcon, RepoIcon } from "@primer/octicons-react";
+
+<MarkGithubIcon size={16} />
+<StarFillIcon size={16} fill="var(--color-warning)" />
+<RepoIcon size={24} />
+```
+
+### GitHubスタイルボタンの例
+
+```tsx
+// プライマリボタン
+<button className="px-4 py-2 rounded-md font-medium text-[15px]
+                   bg-[hsl(var(--color-primary))]
+                   text-[hsl(var(--color-primary-foreground))]
+                   hover:bg-[hsl(var(--color-primary)/0.9)]">
+  Commit changes
+</button>
+
+// セカンダリボタン
+<button className="px-4 py-2 rounded-md font-medium text-[15px]
+                   bg-[hsl(var(--color-secondary))]
+                   text-[hsl(var(--color-secondary-foreground))]
+                   border border-[hsl(var(--color-border))]
+                   hover:bg-[hsl(var(--color-muted))]">
+  Cancel
+</button>
+```
+
+### CSS変数アーキテクチャ
+
+**rem基準サイズシステム**
+
+すべてのサイズ値がrem単位で統一済み：
+
+```css
+/* フォントサイズ */
+--font-size-xs: 0.6875rem; /* 11px */
+--font-size-sm: 0.75rem; /* 12px */
+--font-size-base: 0.875rem; /* 14px */
+--font-size-lg: 1rem; /* 16px */
+
+/* スペーシング */
+--space-2: 0.125rem; /* 2px */
+--space-4: 0.25rem; /* 4px */
+--space-8: 0.5rem; /* 8px */
+--space-16: 1rem; /* 16px */
+
+/* ボーダー半径 */
+--radius-sm: 0.375rem; /* 6px */
+--radius-md: 0.625rem; /* 10px */
+--radius-lg: 0.75rem; /* 12px */
+
+/* レイアウト */
+--container-lg: 64rem; /* 1024px */
+--container-xl: 80rem; /* 1280px */
+```
+
+### 8px基準スペーシング
+
+GitHub風のスペーシングを使用：
+
+- `gap-2` (0.5rem / 8px)
+- `gap-3` (0.75rem / 12px)
+- `gap-4` (1rem / 16px)
+- `rounded-md` (0.375rem / 6px) を統一
 
 ## UI実装時の重要なルール
 
