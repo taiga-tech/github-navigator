@@ -1,45 +1,67 @@
 'use client'
 
+import { useEffect, useState } from 'react'
+
 import { useTheme } from 'next-themes'
 
-import { DeviceDesktopIcon, MoonIcon, SunIcon } from '@primer/octicons-react'
+import { Monitor, Moon, Sun } from 'lucide-react'
 
+import { Button } from '@/components/ui/button'
 import {
-    Select,
-    SelectContent,
-    SelectItem,
-    SelectTrigger,
-    SelectValue,
-} from '@/components/ui/select'
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu'
 
+/**
+ * テーマ切り替えコンポーネント
+ * - ライト/ダーク/システムテーマに対応
+ * - next-themes統合
+ * - アクセシビリティ対応
+ */
 export function ThemeToggle() {
     const { theme, setTheme } = useTheme()
+    const [mounted, setMounted] = useState(false)
+
+    // クライアントサイドでのマウント後にのみレンダリング
+    useEffect(() => {
+        setMounted(true)
+    }, [])
+
+    if (!mounted) {
+        return (
+            <Button variant="outline" size="sm" className="h-9 w-9 p-0">
+                <Sun className="h-4 w-4" />
+                <span className="sr-only">テーマ切り替え</span>
+            </Button>
+        )
+    }
 
     return (
-        <Select value={theme} onValueChange={setTheme} defaultValue="system">
-            <SelectTrigger className="min-w-32 gap-2">
-                <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-                <SelectItem value="light">
-                    <div className="flex items-center gap-2">
-                        <SunIcon size={16} />
-                        <span>ライト</span>
-                    </div>
-                </SelectItem>
-                <SelectItem value="dark">
-                    <div className="flex items-center gap-2">
-                        <MoonIcon size={16} />
-                        <span>ダーク</span>
-                    </div>
-                </SelectItem>
-                <SelectItem value="system">
-                    <div className="flex items-center gap-2">
-                        <DeviceDesktopIcon size={16} />
-                        <span>システム</span>
-                    </div>
-                </SelectItem>
-            </SelectContent>
-        </Select>
+        <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+                <Button variant="outline" size="sm" className="h-9 w-9 p-0">
+                    {theme === 'light' && <Sun className="h-4 w-4" />}
+                    {theme === 'dark' && <Moon className="h-4 w-4" />}
+                    {theme === 'system' && <Monitor className="h-4 w-4" />}
+                    <span className="sr-only">テーマ切り替え</span>
+                </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="min-w-[150px]">
+                <DropdownMenuItem onClick={() => setTheme('light')}>
+                    <Sun className="mr-2 h-4 w-4" />
+                    ライト
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => setTheme('dark')}>
+                    <Moon className="mr-2 h-4 w-4" />
+                    ダーク
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => setTheme('system')}>
+                    <Monitor className="mr-2 h-4 w-4" />
+                    システム
+                </DropdownMenuItem>
+            </DropdownMenuContent>
+        </DropdownMenu>
     )
 }
