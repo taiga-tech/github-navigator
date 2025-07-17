@@ -85,6 +85,15 @@ pnpm format        # 全ファイル
 pnpm start
 ```
 
+### テスト（未実装）
+
+```bash
+# 将来的に追加予定
+pnpm test           # テスト実行
+pnpm test:watch     # ウォッチモード
+pnpm test:coverage  # カバレッジ計測
+```
+
 ### shadcn/ui コンポーネント追加
 
 このプロジェクトは shadcn/ui が設定済みです。新しいコンポーネントを追加する手順：
@@ -154,6 +163,13 @@ pnpm dlx shadcn@latest add button --overwrite
 3. **オプションページ追加**: プロジェクトルートに `options.tsx` を作成
 4. **コンテンツスクリプト追加**: プロジェクトルートに `content.ts` を作成
 5. **開発テスト**: `build/chrome-mv3-dev` ディレクトリを Chrome で読み込み
+
+### コンポーネントの実装指針
+
+- **React.memo**: 頻繁に再レンダリングされるコンポーネントには必須
+- **useCallback/useMemo**: 重い計算やオブジェクト生成時に使用
+- **単一責任の原則**: 1つのコンポーネントは1つの責任のみ
+- **プロップドリリング回避**: 深い階層へのprops渡しは避ける
 
 ### 重要な設定
 
