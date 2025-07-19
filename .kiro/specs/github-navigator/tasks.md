@@ -120,24 +120,104 @@
     - _要件: 7.1, 7.2, 7.3, 7.4, 7.5_
 
 - [ ]   17. パフォーマンス最適化の実装
-    - コンポーネントの遅延読み込み（React.lazy）の実装
-    - メモ化（React.memo, useMemo）によるレンダリング最適化
-    - デバウンス検索機能の実装
-    - バンドルサイズ最適化とコード分割の実装
+    - **レンダリング最適化**
+        - メモ化（React.memo, useMemo, useCallback）によるレンダリング最適化
+        - `src/components/github/button.tsx` - React.memo追加
+        - `src/components/github/theme-toggle.tsx` - React.memo追加
+        - リストコンポーネントの再レンダリング最適化
+    - **コンポーネント最適化**
+        - コンポーネントの遅延読み込み（React.lazy）の実装
+        - `src/components/github/button.tsx:23-49` - Switch文をオブジェクトマップに変更
+        - 条件分岐の最適化とパフォーマンス改善
+    - **バンドル最適化**
+        - デバウンス検索機能の実装
+        - バンドルサイズ最適化とコード分割の実装
+        - Core Web Vitals監視
+        - メモリリーク検出と防止
     - _要件: 8.1, 8.2, 8.3, 8.4, 8.5_
 
-- [ ]   18. 包括的テストスイートの実装
-    - Zodスキーマの単体テスト作成
-    - Jest + React Testing Library による単体テストの作成
-    - Chrome Extension APIs のモックテストの実装
-    - バリデーション機能の統合テスト実装
-    - E2Eテストの実装
-    - テストカバレッジ80%以上の達成
+- [ ]   18. コード品質とアクセシビリティ改善
+    - **TypeScript型定義強化**
+        - `src/components/github/theme-toggle.tsx:16` - theme型をより具体的に定義
+        - propsの型定義をより厳密に
+        - 全コンポーネントのProps型export
+        - TypeScript strict mode対応
+    - **アクセシビリティ改善**
+        - Theme toggleにARIAラベル追加
+        - ボタンコンポーネントにaria-describedby追加
+        - キーボードナビゲーション対応確認
+        - WCAG 2.1 AA準拠対応
+    - **エラーハンドリング強化**
+        - エラーバウンダリコンポーネント作成
+        - 各コンポーネントにエラーステート実装
+        - ローディング・エラー状態の統一
+        - ユーザーフレンドリーなエラーメッセージ実装
+    - **開発環境改善**
+        - Storybookコンポーネントドキュメント追加（将来拡張）
+        - コード品質チェック（ESLint + Prettier準拠）
+    - _要件: 6.5, 7.1, 7.2, 7.4, 7.5_
+
+- [ ]   19. 包括的テストスイートの実装
+    - **フレームワーク設定**
+        - Jestテストフレームワーク導入
+        - React Testing Libraryセットアップ
+        - package.jsonにテストスクリプト追加（test, test:watch, test:coverage）
+    - **単体テスト実装**
+        - Zodスキーマの単体テスト作成
+        - 各UIコンポーネントのユニットテスト作成
+        - GitHub風コンポーネントのテスト実装
+        - Jest + React Testing Library による単体テストの作成
+    - **統合・E2Eテスト**
+        - Chrome Extension APIs のモックテストの実装
+        - バリデーション機能の統合テスト実装
+        - E2Eテスト（Playwright）の実装
+    - **品質保証**
+        - テストカバレッジ80%以上の達成
+        - CI/CDパイプラインでのテスト自動実行
     - _要件: 全要件のテスト検証_
 
-- [ ]   19. 最終統合とビルド最適化
+- [ ]   20. 最終統合とビルド最適化
     - 全機能の統合テストと動作確認
     - プロダクションビルドの最適化
     - Chrome Web Store提出用パッケージの作成
     - ドキュメントとREADMEの更新
     - _要件: 8.1, 8.2, 8.3, 8.4_
+
+## 修正フェーズと品質基準
+
+### Phase 1: 緊急修正（高優先度）
+
+- React.memo追加（リストコンポーネント等）
+- Button component最適化（Switch文をオブジェクトマップに変更）
+- TypeScript型定義強化
+
+### Phase 2: テスト実装
+
+- Jest + React Testing Library セットアップ
+- 基本テストケース作成
+- カバレッジ80%以上達成
+
+### Phase 3: 品質向上
+
+- アクセシビリティ改善（WCAG 2.1 AA準拠）
+- エラーハンドリング追加
+- パフォーマンス監視
+
+### 品質チェック基準
+
+- **コード品質**: ESLint + Prettier準拠
+- **パフォーマンス**: React.memo、useMemo、useCallback活用
+- **アクセシビリティ**: WCAG 2.1 AA準拠
+- **テストカバレッジ**: 80%以上
+- **TypeScript**: strict mode対応
+
+### 完了確認手順
+
+各タスク完了後は以下を実行：
+
+```bash
+pnpm exec tsc --noEmit  # 型チェック
+pnpm lint               # コード品質チェック
+pnpm test               # テスト実行
+pnpm build              # ビルド確認
+```
