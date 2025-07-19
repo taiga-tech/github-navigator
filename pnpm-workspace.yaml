@@ -1,0 +1,3 @@
+patchedDependencies:
+    jiti: patches/jiti.patch
+    '@tailwindcss/oxide': patches/@tailwindcss__oxide.patch

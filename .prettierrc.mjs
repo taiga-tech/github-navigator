@@ -2,25 +2,57 @@
  * @type {import('prettier').Options}
  */
 export default {
-  printWidth: 80,
-  tabWidth: 2,
-  useTabs: false,
-  semi: false,
-  singleQuote: false,
-  trailingComma: "none",
-  bracketSpacing: true,
-  bracketSameLine: true,
-  plugins: ["@ianvs/prettier-plugin-sort-imports"],
-  importOrder: [
-    "<BUILTIN_MODULES>", // Node.js built-in modules
-    "<THIRD_PARTY_MODULES>", // Imports not matched by other special words or groups.
-    "", // Empty line
-    "^@plasmo/(.*)$",
-    "",
-    "^@plasmohq/(.*)$",
-    "",
-    "^~(.*)$",
-    "",
-    "^[./]"
-  ]
+    printWidth: 80,
+    tabWidth: 4,
+    useTabs: false,
+    semi: false,
+    singleQuote: true,
+    trailingComma: 'es5',
+    bracketSpacing: true,
+    bracketSameLine: false,
+    singleAttributePerLine: false,
+    plugins: [
+        '@trivago/prettier-plugin-sort-imports',
+        'prettier-plugin-tailwindcss',
+    ],
+    importOrderSeparation: true,
+    importOrderSortSpecifiers: true,
+    importOrderGroupNamespaceSpecifiers: true,
+    importOrder: [
+        '<TS_TYPES>^(react)',
+        '<TS_TYPES>^(next)',
+        '<TS_TYPES>',
+        '<THIRD_PARTY_TS_TYPES>',
+        '<BUILTIN_MODULES>',
+        '^(react)',
+        '^(next)',
+        '<THIRD_PARTY_MODULES>',
+        '^@plasmo/(.*)$',
+        '^@plasmohq/(.*)$',
+        '^(@/lib)',
+        '^(@/metadata)',
+        '^(@/const)',
+        '^(@/providers|@/hooks|@/contexts|@/components|@/svg|@/pages|@/interfaces)',
+        '^(@/styles|(.*).css+$)',
+        '^@/(.*)$',
+        '^[./]',
+    ],
+    importOrderParserPlugins: [
+        'typescript',
+        'jsx',
+        'classProperties',
+        'decorators-legacy',
+    ],
+    overrides: [
+        { files: '**/*.md', options: { tabWidth: 4 } },
+        { files: '**/*.mdx', options: { tabWidth: 4 } },
+        { files: '**/*.html', options: { tabWidth: 4 } },
+        { files: '**/*.js', options: { tabWidth: 4 } },
+        { files: '**/*.mjs', options: { tabWidth: 4 } },
+        { files: '**/*.jsx', options: { tabWidth: 4 } },
+        { files: '**/*.ts', options: { tabWidth: 4 } },
+        { files: '**/*.tsx', options: { tabWidth: 4 } },
+        { files: '**/*.json', options: { tabWidth: 4 } },
+        { files: '**/*.xml', options: { tabWidth: 4 } },
+    ],
 }

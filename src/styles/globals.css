@@ -1,0 +1,267 @@
+@import 'tailwindcss';
+@import 'tw-animate-css';
+
+@custom-variant dark (&:is(.dark *));
+
+:root {
+    /* GitHub Light Theme Colors */
+    --background: oklch(1 0 89.9); /* #ffffff */
+    --foreground: oklch(0.279 0.013 253); /* #24292f */
+    --card: oklch(0.978 0.003 247.9); /* #f6f8fa */
+    --card-foreground: oklch(0.279 0.013 253); /* #24292f */
+    --popover: oklch(0.978 0.003 247.9); /* #f6f8fa */
+    --popover-foreground: oklch(0.279 0.013 253); /* #24292f */
+    --primary: oklch(0.54 0.191 257.5); /* #0969da */
+    --primary-foreground: oklch(1 0 89.9); /* #ffffff */
+    --primary-hover: oklch(0.508 0.181 257.7); /* #0860ca */
+    --primary-active: oklch(0.476 0.171 258); /* #0757ba */
+    --secondary: oklch(0.978 0.003 247.9); /* #f6f8fa */
+    --secondary-foreground: oklch(0.279 0.013 253); /* #24292f */
+    --secondary-hover: oklch(0.967 0.003 264.5); /* #f3f4f6 */
+    --secondary-active: oklch(0.947 0.007 247.9); /* #eaeef2 */
+    --muted: oklch(0.978 0.003 247.9); /* #f6f8fa */
+    --muted-foreground: oklch(0.531 0.017 251.3); /* #656d76 */
+    --accent: oklch(0.978 0.003 247.9); /* #f6f8fa */
+    --accent-foreground: oklch(0.279 0.013 253); /* #24292f */
+    --destructive: oklch(0.552 0.205 24.5); /* #cf222e */
+    --destructive-foreground: oklch(1 0 89.9); /* #ffffff */
+    --border: oklch(0.876 0.012 248); /* #d0d7de */
+    --input: oklch(0.876 0.012 248); /* #d0d7de */
+    --ring: oklch(0.54 0.191 257.5); /* #0969da */
+    --success: oklch(0.524 0.14 148); /* #1a7f37 */
+    --warning: oklch(0.554 0.117 75); /* #9a6700 */
+    --info: oklch(0.54 0.191 257.5); /* #0969da */
+    --chart-1: oklch(0.646 0.222 41.116);
+    --chart-2: oklch(0.6 0.118 184.704);
+    --chart-3: oklch(0.398 0.07 227.392);
+    --chart-4: oklch(0.828 0.189 84.429);
+    --chart-5: oklch(0.769 0.188 70.08);
+    --radius: 0.625rem;
+    --sidebar: oklch(0.985 0 0);
+    --sidebar-foreground: oklch(0.145 0 0);
+    --sidebar-primary: oklch(0.205 0 0);
+    --sidebar-primary-foreground: oklch(0.985 0 0);
+    --sidebar-accent: oklch(0.97 0 0);
+    --sidebar-accent-foreground: oklch(0.205 0 0);
+    --sidebar-border: oklch(0.922 0 0);
+    --sidebar-ring: oklch(0.708 0 0);
+
+    /* 共通変数 - Typography */
+    --font-family-base:
+        'FKGroteskNeue', 'Geist', 'Inter', -apple-system, BlinkMacSystemFont,
+        'Segoe UI', Roboto, sans-serif;
+    --font-family-mono:
+        'Berkeley Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas,
+        monospace;
+    --font-size-xs: 0.6875rem; /* 11px */
+    --font-size-sm: 0.75rem; /* 12px */
+    --font-size-base: 0.875rem; /* 14px */
+    --font-size-md: 0.875rem; /* 14px */
+    --font-size-lg: 1rem; /* 16px */
+    --font-size-xl: 1.125rem; /* 18px */
+    --font-size-2xl: 1.25rem; /* 20px */
+    --font-size-3xl: 1.5rem; /* 24px */
+    --font-size-4xl: 1.875rem; /* 30px */
+    --font-weight-normal: 400;
+    --font-weight-medium: 500;
+    --font-weight-semibold: 550;
+    --font-weight-bold: 600;
+    --line-height-tight: 1.2;
+    --line-height-normal: 1.5;
+    --letter-spacing-tight: -0.01em;
+
+    /* Spacing */
+    --space-0: 0;
+    --space-1: 0.0625rem; /* 1px */
+    --space-2: 0.125rem; /* 2px */
+    --space-4: 0.25rem; /* 4px */
+    --space-6: 0.375rem; /* 6px */
+    --space-8: 0.5rem; /* 8px */
+    --space-10: 0.625rem; /* 10px */
+    --space-12: 0.75rem; /* 12px */
+    --space-16: 1rem; /* 16px */
+    --space-20: 1.25rem; /* 20px */
+    --space-24: 1.5rem; /* 24px */
+    --space-32: 2rem; /* 32px */
+
+    /* Border Radius */
+    --radius-sm: 0.375rem; /* 6px */
+    --radius-base: 0.5rem; /* 8px */
+    --radius-md: 0.625rem; /* 10px */
+    --radius-lg: 0.75rem; /* 12px */
+    --radius-full: 62.4375rem; /* 9999px */
+
+    /* Shadows */
+    --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.02);
+    --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.04), 0 1px 2px rgba(0, 0, 0, 0.02);
+    --shadow-md:
+        0 4px 6px -1px rgba(0, 0, 0, 0.04), 0 2px 4px -1px rgba(0, 0, 0, 0.02);
+    --shadow-lg:
+        0 10px 15px -3px rgba(0, 0, 0, 0.04), 0 4px 6px -2px rgba(0, 0, 0, 0.02);
+    --shadow-inset-sm:
+        inset 0 1px 0 rgba(255, 255, 255, 0.15),
+        inset 0 -1px 0 rgba(0, 0, 0, 0.03);
+
+    /* Animation */
+    --duration-fast: 150ms;
+    --duration-normal: 250ms;
+    --ease-standard: cubic-bezier(0.16, 1, 0.3, 1);
+
+    /* Layout */
+    --container-sm: 40rem; /* 640px */
+    --container-md: 48rem; /* 768px */
+    --container-lg: 64rem; /* 1024px */
+    --container-xl: 80rem; /* 1280px */
+
+    /* GitHub specific colors - ライトモード */
+    --github-canvas-default: oklch(1 0 89.9); /* #ffffff */
+    --github-canvas-overlay: oklch(0.978 0.003 247.9); /* #f6f8fa */
+    --github-canvas-inset: oklch(0.978 0.003 247.9); /* #f6f8fa */
+    --github-canvas-subtle: oklch(0.978 0.003 247.9); /* #f6f8fa */
+    --github-border-default: oklch(0.876 0.012 248); /* #d0d7de */
+    --github-border-muted: oklch(0.898 0.01 247.9); /* #d8dee4 */
+    --github-neutral-muted: rgba(175, 184, 193, 0.2);
+    --github-accent-fg: oklch(0.54 0.191 257.5); /* #0969da */
+    --github-accent-emphasis: oklch(0.54 0.191 257.5); /* #0969da */
+    --github-success-fg: oklch(0.524 0.14 148); /* #1a7f37 */
+    --github-attention-fg: oklch(0.554 0.117 75); /* #9a6700 */
+    --github-danger-fg: oklch(0.552 0.205 24.5); /* #cf222e */
+    --github-done-fg: oklch(0.563 0.207 295); /* #8250df */
+    --github-sponsors-fg: oklch(0.662 0.137 79.3); /* #bf8700 */
+
+    /* Common style patterns - ライトモード */
+    --focus-ring: 0 0 0 3px rgba(9, 105, 218, 0.3); /* GitHub公式フォーカスリング */
+    --focus-outline: 2px solid oklch(0.438 0.118 243.47);
+    --status-bg-opacity: 0.15;
+    --status-border-opacity: 0.25;
+}
+
+.dark {
+    /* GitHub Dark Theme Colors */
+    --background: oklch(0.176 0.014 258.4); /* #0d1117 */
+    --foreground: oklch(0.97 0.01 247.9); /* #f0f6fc */
+    --card: oklch(0.22 0.016 256.8); /* #161b22 */
+    --card-foreground: oklch(0.97 0.01 247.9); /* #f0f6fc */
+    --popover: oklch(0.22 0.016 256.8); /* #161b22 */
+    --popover-foreground: oklch(0.97 0.01 247.9); /* #f0f6fc */
+    --primary: oklch(0.715 0.152 253.3); /* #58a6ff */
+    --primary-foreground: oklch(1 0 89.9); /* #ffffff */
+    --primary-hover: oklch(0.645 0.118 243.4); /* #4c9aff 推定 */
+    --primary-active: oklch(0.593 0.118 243.4); /* #409eff 推定 */
+    --secondary: oklch(0.267 0.015 256.8); /* #21262d */
+    --secondary-foreground: oklch(0.97 0.01 247.9); /* #f0f6fc */
+    --secondary-hover: oklch(0.197 0.01 265.75); /* #292e36 推定 */
+    --secondary-active: oklch(0.217 0.01 265.75); /* #2f3439 推定 */
+    --muted: oklch(0.267 0.015 256.8); /* #21262d */
+    --muted-foreground: oklch(0.563 0.02 256.3); /* #6e7681 */
+    --accent: oklch(0.267 0.015 256.8); /* #21262d */
+    --accent-foreground: oklch(0.97 0.01 247.9); /* #f0f6fc */
+    --destructive: oklch(0.665 0.205 27); /* #f85149 */
+    --destructive-foreground: oklch(1 0 89.9); /* #ffffff */
+    --border: oklch(0.33 0.015 252.3); /* #30363d */
+    --input: oklch(0.33 0.015 252.3); /* #30363d */
+    --ring: oklch(0.715 0.152 253.3); /* #58a6ff */
+    --success: oklch(0.695 0.181 145.6); /* #3fb950 */
+    --warning: oklch(0.72 0.14 79.9); /* #d29922 */
+    --info: oklch(0.715 0.152 253.3); /* #58a6ff */
+    --chart-1: oklch(0.488 0.243 264.376);
+    --chart-2: oklch(0.696 0.17 162.48);
+    --chart-3: oklch(0.769 0.188 70.08);
+    --chart-4: oklch(0.627 0.265 303.9);
+    --chart-5: oklch(0.645 0.246 16.439);
+    --sidebar: oklch(0.205 0 0);
+    --sidebar-foreground: oklch(0.985 0 0);
+    --sidebar-primary: oklch(0.488 0.243 264.376);
+    --sidebar-primary-foreground: oklch(0.985 0 0);
+    --sidebar-accent: oklch(0.269 0 0);
+    --sidebar-accent-foreground: oklch(0.985 0 0);
+    --sidebar-border: oklch(1 0 0 / 10%);
+    --sidebar-ring: oklch(0.556 0 0);
+
+    /* GitHub specific colors */
+    --github-canvas-default: oklch(0.176 0.014 258.4); /* #0d1117 */
+    --github-canvas-overlay: oklch(0.22 0.016 256.8); /* #161b22 */
+    --github-canvas-inset: oklch(0.104 0.019 248.3); /* #010409 */
+    --github-canvas-subtle: oklch(0.267 0.015 256.8); /* #21262d */
+    --github-border-default: oklch(0.33 0.015 252.3); /* #30363d */
+    --github-border-muted: oklch(0.267 0.015 256.8); /* #21262d */
+    --github-neutral-muted: rgba(110, 118, 129, 0.4);
+    --github-accent-fg: oklch(0.715 0.152 253.3); /* #58a6ff */
+    --github-accent-emphasis: oklch(0.569 0.202 259.7); /* #1f6feb */
+    --github-success-fg: oklch(0.695 0.181 145.6); /* #3fb950 */
+    --github-attention-fg: oklch(0.72 0.14 79.9); /* #d29922 */
+    --github-danger-fg: oklch(0.665 0.205 27); /* #f85149 */
+    --github-done-fg: oklch(0.752 0.132 284.2); /* #a5a2ff */
+    --github-sponsors-fg: oklch(0.662 0.168 349.5); /* #db61a2 */
+
+    /* Common style patterns */
+    --focus-ring: 0 0 0 3px rgba(88, 166, 255, 0.4);
+    --focus-outline: 2px solid oklch(0.715 0.152 253.3);
+}
+
+@theme inline {
+    --color-background: var(--background);
+    --color-foreground: var(--foreground);
+    --color-card: var(--card);
+    --color-card-foreground: var(--card-foreground);
+    --color-popover: var(--popover);
+    --color-popover-foreground: var(--popover-foreground);
+    --color-primary: var(--primary);
+    --color-primary-foreground: var(--primary-foreground);
+    --color-secondary: var(--secondary);
+    --color-secondary-foreground: var(--secondary-foreground);
+    --color-muted: var(--muted);
+    --color-muted-foreground: var(--muted-foreground);
+    --color-accent: var(--accent);
+    --color-accent-foreground: var(--accent-foreground);
+    --color-destructive: var(--destructive);
+    --color-destructive-foreground: var(--destructive-foreground);
+    --color-border: var(--border);
+    --color-input: var(--input);
+    --color-ring: var(--ring);
+    --color-success: var(--success);
+    --color-warning: var(--warning);
+    --color-info: var(--info);
+    --color-chart-1: var(--chart-1);
+    --color-chart-2: var(--chart-2);
+    --color-chart-3: var(--chart-3);
+    --color-chart-4: var(--chart-4);
+    --color-chart-5: var(--chart-5);
+    --radius-sm: calc(var(--radius) - 4px);
+    --radius-md: calc(var(--radius) - 2px);
+    --radius-lg: var(--radius);
+    --radius-xl: calc(var(--radius) + 4px);
+    --color-sidebar: var(--sidebar);
+    --color-sidebar-foreground: var(--sidebar-foreground);
+    --color-sidebar-primary: var(--sidebar-primary);
+    --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+    --color-sidebar-accent: var(--sidebar-accent);
+    --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+    --color-sidebar-border: var(--sidebar-border);
+    --color-sidebar-ring: var(--sidebar-ring);
+
+    /* GitHub specific colors for Tailwind */
+    --color-github-canvas-default: var(--github-canvas-default);
+    --color-github-canvas-overlay: var(--github-canvas-overlay);
+    --color-github-canvas-inset: var(--github-canvas-inset);
+    --color-github-canvas-subtle: var(--github-canvas-subtle);
+    --color-github-border-default: var(--github-border-default);
+    --color-github-border-muted: var(--github-border-muted);
+    --color-github-neutral-muted: var(--github-neutral-muted);
+    --color-github-accent-fg: var(--github-accent-fg);
+    --color-github-accent-emphasis: var(--github-accent-emphasis);
+    --color-github-success-fg: var(--github-success-fg);
+    --color-github-attention-fg: var(--github-attention-fg);
+    --color-github-danger-fg: var(--github-danger-fg);
+    --color-github-done-fg: var(--github-done-fg);
+    --color-github-sponsors-fg: var(--github-sponsors-fg);
+}
+
+@layer base {
+    * {
+        @apply border-border outline-ring/50;
+    }
+    body {
+        @apply bg-background text-foreground;
+    }
+}

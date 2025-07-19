@@ -1,23 +1,29 @@
-"use client";
+'use client'
 
-import { useState } from "react"
+import { useState } from 'react'
 
-export function Main({ name = "Extension" }) {
-  const [data, setData] = useState("")
+import { Providers } from '@/components/providers'
 
-  return (
-    <div
-      style={{
-        display: "flex",
-        flexDirection: "column",
-        padding: 16
-      }}>
-      <h1>
-        Welcome to your <a href="https://www.plasmo.com">Plasmo</a> {name}!
-      </h1>
-      <input onChange={(e) => setData(e.target.value)} value={data} />
+import '@/styles/globals.css'
 
-      <a href="https://docs.plasmo.com">READ THE DOCS!</a>
-    </div>
-  )
+interface Props {
+    name?: string
+}
+
+export const Main = ({ name = 'Extension' }: Readonly<Props>) => {
+    const [data, setData] = useState('')
+
+    return (
+        <Providers>
+            <div className="flex w-100 flex-col p-4">
+                <h1>
+                    Welcome to your <a href="https://www.plasmo.com">Plasmo</a>{' '}
+                    {name}!
+                </h1>
+                <input onChange={(e) => setData(e.target.value)} value={data} />
+
+                <a href="https://docs.plasmo.com">READ THE DOCS!</a>
+            </div>
+        </Providers>
+    )
 }
