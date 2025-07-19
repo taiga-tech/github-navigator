@@ -5,34 +5,32 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ## 必須事項
 
 - 回答は全て日本語で行ってください。
-- 起動時に以下の内容を読み込んでください。
 - コードの変更は、以下のプロジェクト概要と技術スタックに基づいて行ってください。
-- 重要な指示や構造の変更があった場合は、必ずその指示に従ってCLAUDE.mdの内容を更新してください。
 
 ## プロジェクト概要
 
-このプロジェクトは、Plasmoフレームワークを使用したChrome拡張機能「Github navigator」です。Plasmo v0.90.5とNext.js 15.3.5、React 19.1.0を組み合わせて、モダンなReactベースの拡張機能を構築しています。
+このプロジェクトは、Plasmoフレームワークを使用したChrome拡張機能「Github navigator」です。Plasmo v0.90.5とNext.js 15.4.2、React 19.1.0を組み合わせて、モダンなReactベースの拡張機能を構築しています。
 
 ### 技術スタック
 
 - **フレームワーク**: Plasmo v0.90.5（Chrome拡張機能開発）
-- **UI**: React 19.1.0 + Next.js 15.3.5
-- **スタイリング**: Tailwind CSS v4.1.11
-- **UI コンポーネントシステム**: shadcn/ui（New York スタイル、45コンポーネント導入済み）
+- **UI**: React 19.1.0 + Next.js 15.4.2
+- **スタイリング**: Tailwind CSS v4.1.11 + tw-animate-css v1.3.5
+- **UI コンポーネントシステム**: shadcn/ui（New York スタイル、46コンポーネント導入済み）
 - **リサイザブル**: react-resizable-panels v3.0.3
 - **ベースコンポーネント**: Radix UI（Dialog, Popover, Scroll Area, Tabs等）
 - **アイコン**: Lucide React v0.525.0 + Octicons React v19.15.3（GitHub公式）
 - **テーマ管理**: next-themes v0.4.6（システム/ダーク/ライトモード対応）
 - **コマンドパレット**: cmdk v1.1.1
 - **チャート**: recharts v2.15.4
-- **日付処理**: date-fns v4.1.0
+- **日付処理**: date-fns v4.1.0 + react-day-picker v9.8.0
 - **フォーム管理**: react-hook-form v7.60.0 + hookform/resolvers v5.1.1
 - **通知**: sonner v2.0.6
 - **バリデーション**: zod v4.0.5
 - **カルーセル**: embla-carousel-react v8.6.0
 - **ドロワー**: vaul v1.1.2
 - **OTP入力**: input-otp v1.4.2
-- **ユーティリティ**: clsx v2.1.1 + tailwind-merge v3.3.1
+- **ユーティリティ**: clsx v2.1.1 + tailwind-merge v3.3.1 + class-variance-authority v0.7.1
 - **TypeScript**: v5.8.3
 - **パッケージマネージャー**: pnpm v10.13.1
 
@@ -77,6 +75,23 @@ pnpm lint:fix      # 自動修正
 # Prettier（自動インポート順序整理）
 pnpm format        # 全ファイル
 ```
+
+#### ESLint設定詳細
+
+現在の設定は Flat Config 形式で以下のルールを統合：
+
+- **基本**: @eslint/js推奨設定
+- **TypeScript**: typescript-eslint推奨設定、未使用変数エラー
+- **React**: eslint-plugin-react、JSXスコープ不要設定
+- **React Hooks**: exhaustive-deps エラー設定
+- **Next.js**: core-web-vitals対応
+- **Prettier**: コード整形との競合回避（eslint-config-prettier）
+
+主要なカスタムルール：
+
+- `@typescript-eslint/no-unused-vars`: アンダースコア接頭辞で無視
+- `react/react-in-jsx-scope`: 新JSX変換により無効
+- `react-hooks/exhaustive-deps`: エラーレベル
 
 ### Next.jsサーバー
 
@@ -132,12 +147,15 @@ pnpm dlx shadcn@latest add button --overwrite
 
 #### 現在の設定
 
-- **スタイル**: New York
+- **スタイル**: new-york
+- **RSC**: 有効（React Server Components対応）
+- **TSX**: 有効
 - **ベースカラー**: neutral
 - **CSS変数**: 有効
-- **アイコンライブラリ**: Lucide React
-- **インストール先**: `src/components/ui/`
-- **ユーティリティ**: `src/lib/utils.ts` (cn関数)
+- **アイコンライブラリ**: lucide
+- **CSS ファイル**: `src/styles/globals.css`
+- **インストール先**: `@/components/ui/`
+- **ユーティリティ**: `@/lib/utils` (cn関数)
 
 ## アーキテクチャ
 
@@ -146,12 +164,12 @@ pnpm dlx shadcn@latest add button --overwrite
 - `src/popup/index.tsx` - 拡張機能のポップアップエントリーポイント
 - `src/components/main.tsx` - メインコンポーネント（ポップアップとNext.jsアプリで共有）
 - `src/components/providers.tsx` - テーマプロバイダー（next-themes）
-- `src/components/ui/` - shadcn/ui コンポーネント（45コンポーネント導入済み）
+- `src/components/ui/` - shadcn/ui コンポーネント（46コンポーネント導入済み）
 - `src/components/github/` - GitHub風カスタムコンポーネント（8コンポーネント）
 - `src/components/demo/` - デモ用ショーケース（4コンポーネント）
 - `src/hooks/use-mobile.ts` - モバイル検出カスタムフック
 - `src/lib/utils.ts` - ユーティリティ関数（cn関数など）
-- `src/app/` - Next.jsアプリケーション用ディレクトリ
+- `src/app/` - Next.jsアプリケーション用ディレクトリ（App Router対応、layout.tsx/page.tsx）
 - `src/styles/globals.css` - グローバルスタイル（Tailwind CSS設定含む）
 - `components.json` - shadcn/ui設定ファイル
 - `tsconfig.json` - TypeScript設定（Plasmoのベース設定を拡張）
@@ -192,9 +210,9 @@ TypeScript (`tsconfig.json`) とshadcn/ui (`components.json`) で以下のパス
 
 #### コード品質設定
 
-- **Prettier**: インポート順序の自動整理、Tailwind CSSクラス順序
-- **ESLint**: TypeScript用ルール、Chrome拡張機能API対応
-- **TypeScript**: Plasmoベース設定を拡張、Next.jsプラグイン使用
+- **Prettier**: インポート順序の自動整理、Tailwind CSSクラス順序（@trivago/prettier-plugin-sort-imports）
+- **ESLint**: Flat Config形式、TypeScript + React + Next.js統合ルール、Chrome拡張機能API対応
+- **TypeScript**: v5.8.3、Plasmo templates/tsconfig.base拡張、Next.jsプラグイン、isolatedModules有効
 
 ### Plasmo フレームワークの特徴
 
@@ -211,19 +229,39 @@ TypeScript (`tsconfig.json`) とshadcn/ui (`components.json`) で以下のパス
 - 拡張機能のテストは `build/chrome-mv3-dev` ディレクトリを Chrome で読み込み
 - Next.jsアプリは `http://localhost:1947` でアクセス可能
 - インポート順序はPrettierで自動整理される（React/Next.js → サードパーティ → Plasmo → 内部モジュール → 相対パス）
-- 依存関係の一部（jiti、@tailwindcss/oxide）にパッチが適用されている（pnpm patches）
+- 依存関係の一部（jiti、@tailwindcss/oxide）にパッチが適用されている（pnpm patches、pnpm-workspace.yaml管理）
 
 ### 利用可能なshadcn/uiコンポーネント
 
-現在45のコンポーネントが導入済み：
+現在46のコンポーネントが導入済み：
 
-- **基本**: Button, Badge, Avatar, Separator, Skeleton等
-- **フォーム**: Input, Textarea, Select, Checkbox, Switch, Slider等
-- **ナビゲーション**: Breadcrumb, Pagination, Tabs, Command等
-- **表示**: Card, Alert, Dialog, Popover, Tooltip, Table, Calendar, Carousel等
-- **レイアウト**: ScrollArea, Resizable, Collapsible, Sidebar, Sheet, Drawer等
-- **入力**: Input, Textarea, Select, Checkbox, Switch, Slider, InputOTP等
-- **フィードバック**: Progress, Alert, Sonner（トースト通知）等
+**基本コンポーネント:**
+
+- Avatar, Badge, Button, Card, Separator, Skeleton
+
+**フォーム・入力:**
+
+- Checkbox, Form, Input, Input-OTP, Label, Radio-Group, Select, Slider, Switch, Textarea, Toggle, Toggle-Group
+
+**ナビゲーション:**
+
+- Breadcrumb, Command, Menubar, Navigation-Menu, Pagination, Tabs
+
+**レイアウト:**
+
+- Accordion, Aspect-Ratio, Collapsible, Resizable, Scroll-Area, Sheet, Sidebar
+
+**ダイアログ・オーバーレイ:**
+
+- Alert-Dialog, Context-Menu, Dialog, Drawer, Dropdown-Menu, Hover-Card, Popover, Tooltip
+
+**表示・フィードバック:**
+
+- Alert, Calendar, Carousel, Chart, Progress, Sonner, Table
+
+**その他:**
+
+- PostCSS, Tailwind CSS連携済み
 
 ### GitHubコンポーネント（8コンポーネント）
 
@@ -420,7 +458,7 @@ const config = useMemo(
 **ローカル状態管理:**
 
 - **React標準のuseState**: コンポーネント内の基本的な状態管理
-- **react-hook-form**: フォーム状態管理（v7.59.0）
+- **react-hook-form**: フォーム状態管理（v7.60.0）
 
 **グローバル状態管理:**
 
@@ -628,10 +666,81 @@ const useStore = create(
 2. **フェーズ2**: Zustand/Jotaiの導入（複雑な状態管理が必要になった場合）
 3. **フェーズ3**: React Query/SWRの導入（API統合が本格化した場合）
 
-## 実装ログ
+## アーキテクチャの重要なポイント
 
-すべての実装変更は`.claude/logs/`ディレクトリに記録してください。
+### デュアル開発環境
 
-ログファイル命名規則：`YYYY-MM-DD_HH-MM-SS_brief-description.md`
+このプロジェクトの最大の特徴は、Chrome拡張機能とNext.jsアプリが同時に動作することです：
 
-例：`2024-01-15_14-30-00_add-notification-system.md`
+- **拡張機能**: `src/popup/index.tsx` → Chrome拡張のポップアップ
+- **Webアプリ**: `src/app/page.tsx` → Next.jsのWebアプリ（App Router、metadata API対応）
+- **共有UI**: `src/components/main.tsx` → 両方で使用される共通コンポーネント
+
+### コンポーネント構成
+
+```
+src/components/
+├── ui/              # shadcn/ui標準コンポーネント（46個）
+├── github/          # GitHub風カスタムコンポーネント（8個）
+├── demo/            # ショーケース用（4個）
+├── main.tsx         # 共有メインコンポーネント
+└── providers.tsx    # テーマプロバイダー
+```
+
+### GitHub Primerデザインシステム
+
+完全なGitHub Primerカラーパレットが実装済み。CSS変数による動的テーマ切り替えに対応：
+
+- ライトテーマ：`#ffffff` background, `#0969da` primary
+- ダークテーマ：`#0d1117` background, `#58a6ff` primary
+
+### 状態管理のアプローチ
+
+現在は軽量な構成を採用：
+
+- **ローカル**: React useState + react-hook-form
+- **グローバル**: next-themes（テーマ管理）
+- **永続化**: @plasmohq/storage（Chrome拡張用）
+
+複雑になった場合の拡張戦略：useState → Context API → Zustand → React Query
+
+## 開発時のベストプラクティス
+
+### パフォーマンス最適化
+
+```tsx
+// 必須：コンポーネントのメモ化
+export const Component = memo(({ prop }) => {
+    /* ... */
+})
+
+// 必須：重い計算のメモ化
+const value = useMemo(() => expensiveCalc(data), [data])
+
+// 必須：イベントハンドラーのメモ化
+const handler = useCallback(
+    (e) => {
+        /* ... */
+    },
+    [deps]
+)
+```
+
+### CSS制約
+
+- `absolute`, `fixed`, `sticky`の使用は最小限に
+- Flexbox, Gridレイアウトを優先
+- Tailwind CSSユーティリティクラスを活用
+
+### Chrome拡張機能特有の制約
+
+```tsx
+// Storage API使用例
+import { Storage } from '@plasmohq/storage'
+
+// タブ情報の取得
+const [tab] = await chrome.tabs.query({ active: true, currentWindow: true })
+
+const storage = new Storage()
+await storage.set('key', value)
+```
