@@ -1,20 +1,35 @@
-import typescriptEslint from '@typescript-eslint/eslint-plugin'
-import typescriptParser from '@typescript-eslint/parser'
+import js from '@eslint/js'
+import pluginNext from '@next/eslint-plugin-next'
+import eslintConfigPrettier from 'eslint-config-prettier'
+import pluginReact from 'eslint-plugin-react'
+import pluginReactHooks from 'eslint-plugin-react-hooks'
+import globals from 'globals'
+import tseslint from 'typescript-eslint'
 
 export default [
     {
-        ignores: ['dist', 'node_modules', '*.config.js', '*.config.ts'],
+        ignores: [
+            'dist',
+            'node_modules',
+            '*.config.js',
+            '*.config.ts',
+            'build',
+            '.next',
+            '.plasmo',
+            '.docs',
+        ],
     },
+    js.configs.recommended,
+    eslintConfigPrettier,
+    ...tseslint.configs.recommended,
     {
-        files: ['**/*.{ts,tsx}'],
-        plugins: {
-            '@typescript-eslint': typescriptEslint,
-        },
+        files: ['**/*.{js,mjs,cjs,ts,tsx}'],
         languageOptions: {
-            parser: typescriptParser,
             ecmaVersion: 2022,
             sourceType: 'module',
             globals: {
+                ...globals.browser,
+                ...globals.es2022,
                 console: 'readonly',
                 chrome: 'readonly',
                 window: 'readonly',
@@ -37,6 +52,37 @@ export default [
             ],
             '@typescript-eslint/no-explicit-any': 'warn',
             'no-console': 'off',
+        },
+    },
+    {
+        ...pluginReact.configs.flat.recommended,
+        languageOptions: {
+            ...pluginReact.configs.flat.recommended.languageOptions,
+            globals: {
+                ...globals.serviceworker,
+            },
+        },
+    },
+    {
+        plugins: {
+            '@next/next': pluginNext,
+        },
+        rules: {
+            ...pluginNext.configs.recommended.rules,
+            ...pluginNext.configs['core-web-vitals'].rules,
+        },
+    },
+    {
+        plugins: {
+            'react-hooks': pluginReactHooks,
+        },
+        settings: { react: { version: 'detect' } },
+        rules: {
+            ...pluginReactHooks.configs.recommended.rules,
+            // React scope no longer necessary with new JSX transform.
+            'react/react-in-jsx-scope': 'off',
+            'react/prop-types': 'off',
+            'react-hooks/exhaustive-deps': 'error',
         },
     },
 ]

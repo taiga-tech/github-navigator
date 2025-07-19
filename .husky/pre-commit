@@ -1,0 +1,16 @@
+# Pre-commit hook for GitHub Navigator
+echo "🔍 Running pre-commit checks..."
+
+# Format code with Prettier
+echo "📝 Formatting code with Prettier..."
+pnpm format
+
+# Lint code with ESLint
+echo "🔧 Linting code with ESLint..."
+pnpm lint:fix
+
+# Type check with TypeScript (excluding known chart.tsx issues)
+echo "📋 Type checking with TypeScript..."
+pnpm exec tsc --noEmit --skipLibCheck
+
+echo "✅ Pre-commit checks completed!"
