@@ -53,7 +53,7 @@ GitHub Navigator Chrome拡張機能は、Plasmoフレームワークを使用し
 │ │ [🔍] Repository Search Input          [⚙️] Settings    │ │
 │ └─────────────────────────────────────────────────────────┘ │
 ├─────────────────────────────────────────────────────────────┤
-│ Main Layout (400px × 500px)                                │
+│ Main Layout (600 × 600px)                                │
 │ ┌─────────────────────────────┬─────────────────────────────┐ │
 │ │                             │                             │ │
 │ │ Main Content Area           │ Tab Navigation              │ │
@@ -76,7 +76,7 @@ GitHub Navigator Chrome拡張機能は、Plasmoフレームワークを使用し
 // src/popup/index.tsx
 export default function Popup() {
   return (
-    <div className="w-[400px] h-[600px]">
+    <div className="w-150 h-150 flex flex-col">
       <Header />
       <MainLayout />
     </div>
@@ -98,9 +98,9 @@ function Header() {
 // Main Layout Component
 function MainLayout() {
   return (
-    <div className="flex h-[500px]">
-      <MainContentArea className="flex-[2] border-r" />
-      <TabNavigation className="flex-1 p-4" />
+    <div className="grid grid-cols-2 flex-1">
+      <MainContentArea className="col-span-2" />
+      <TabNavigation className="col-span-1" />
     </div>
   )
 }
