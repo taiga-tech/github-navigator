@@ -66,7 +66,7 @@ pnpm build:next    # Next.jsアプリのみ
 
 ```bash
 # TypeScript型チェック
-pnpm exec tsc --noEmit
+pnpm typecheck
 
 # ESLint（設定：eslint.config.js）
 pnpm lint          # チェックのみ
@@ -100,13 +100,18 @@ pnpm format        # 全ファイル
 pnpm start
 ```
 
-### テスト（未実装）
+### テスト
 
 ```bash
-# 将来的に追加予定
+# テスト実行
 pnpm test           # テスト実行
 pnpm test:watch     # ウォッチモード
+pnpm test:ui        # UI付きテスト実行
 pnpm test:coverage  # カバレッジ計測
+
+# 型チェックと品質チェック
+pnpm typecheck      # TypeScript型チェック
+pnpm lint           # ESLintチェック
 ```
 
 ### shadcn/ui コンポーネント追加

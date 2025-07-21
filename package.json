@@ -2,8 +2,8 @@
     "name": "github-navigator",
     "description": "A basic Plasmo extension.",
     "version": "0.0.1",
-    "type": "module",
     "author": "taiga-tech <>",
+    "type": "module",
     "scripts": {
         "start": "next start",
         "dev": "run-p dev:*",
@@ -12,6 +12,11 @@
         "build": "run-p build:*",
         "build:plasmo": "plasmo build",
         "build:next": "next build",
+        "typecheck": "tsc",
+        "test": "vitest",
+        "test:watch": "vitest --watch",
+        "test:ui": "vitest --ui",
+        "test:coverage": "vitest --coverage",
         "format": "prettier --write \"**/*.{js,mjs,jsx,json,ts,tsx,md,mdx,css,html,yml,yaml,scss,sass}\" --ignore-path .prettierignore",
         "lint": "eslint .",
         "lint:fix": "eslint . --fix",
@@ -69,6 +74,9 @@
         "@plasmohq/rps": "1.8.7",
         "@plasmohq/storage": "1.15.0",
         "@tailwindcss/postcss": "^4.1.11",
+        "@testing-library/jest-dom": "^6.6.3",
+        "@testing-library/react": "^16.3.0",
+        "@testing-library/user-event": "^14.6.1",
         "@trivago/prettier-plugin-sort-imports": "^5.2.2",
         "@types/chrome": "0.1.1",
         "@types/node": "24.0.15",
@@ -76,6 +84,8 @@
         "@types/react-dom": "19.1.6",
         "@typescript-eslint/eslint-plugin": "^8.37.0",
         "@typescript-eslint/parser": "^8.37.0",
+        "@vitest/coverage-v8": "^3.2.4",
+        "@vitest/ui": "^3.2.4",
         "autoprefixer": "^10.4.21",
         "class-variance-authority": "^0.7.1",
         "clsx": "^2.1.1",
@@ -85,6 +95,7 @@
         "eslint-plugin-react-hooks": "^5.2.0",
         "globals": "^16.3.0",
         "husky": "^9.1.7",
+        "jsdom": "^26.1.0",
         "lucide-react": "^0.525.0",
         "postcss": "^8.5.6",
         "prettier": "3.6.2",
@@ -93,15 +104,21 @@
         "tailwindcss": "^4.1.11",
         "tw-animate-css": "^1.3.5",
         "typescript": "5.8.3",
-        "typescript-eslint": "^8.37.0"
+        "typescript-eslint": "^8.37.0",
+        "vitest": "^3.2.4"
     },
     "displayName": "Github navigator",
     "manifest": {
         "host_permissions": [
-            "https://*/*"
+            "https://*/*",
+            "https://github.com/*",
+            "https://api.github.com/*"
         ],
         "permissions": [
-            "tabs"
+            "tabs",
+            "identity",
+            "storage",
+            "notifications"
         ]
     },
     "packageManager": "pnpm@10.13.1+sha512.37ebf1a5c7a30d5fabe0c5df44ee8da4c965ca0c5af3dbab28c3a1681b70a256218d05c81c9c0dcf767ef6b8551eb5b960042b9ed4300c59242336377e01cfad",
@@ -109,6 +126,12 @@
         "patchedDependencies": {
             "jiti": "patches/jiti.patch",
             "@tailwindcss/oxide": "patches/@tailwindcss__oxide.patch"
+        },
+        "overrides": {
+            "msgpackr": "^1.10.1",
+            "cross-spawn": "^7.0.5",
+            "svelte": "^4.2.19",
+            "esbuild": "^0.25.0"
         }
     }
 }

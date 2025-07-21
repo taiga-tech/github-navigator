@@ -1,3 +1,5 @@
+import { memo } from 'react'
+
 import { StarIcon } from '@primer/octicons-react'
 
 import { Badge } from '@/components/ui/badge'
@@ -11,7 +13,7 @@ interface RepoCardProps {
     stars: string
 }
 
-export function RepoCard({
+export const RepoCard = memo(function RepoCard({
     name,
     visibility,
     description,
@@ -49,4 +51,4 @@ export function RepoCard({
             </div>
         </div>
     )
-}
+})

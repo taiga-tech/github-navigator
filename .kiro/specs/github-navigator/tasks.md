@@ -8,7 +8,7 @@
     - 基本的なポップアップエントリーポイントの作成
     - _要件: 1.1, 8.3_
 
-- [ ]   2. 認証システムの実装
+- [x]   2. 認証システムの実装
     - GitHub OAuth 2.0認証フローの実装
     - Personal Access Token の安全な保存機能
     - トークン有効性チェック機能の実装
@@ -16,7 +16,7 @@
     - _要件: 2.1, 2.2, 2.3, 2.4, 2.5, 2.6_
 
 - [ ]   3. 基本レイアウトとヘッダーコンポーネントの実装
-    - 400px × 600px のポップアップレイアウト構造の作成
+    - 600px × 600px のポップアップレイアウト構造の作成
     - ヘッダーコンポーネント（検索バー + 設定ボタン）の実装
     - 左右分割メインレイアウト（2:1比率）の実装
     - レスポンシブデザインとTailwind CSSスタイリングの適用
@@ -159,20 +159,20 @@
 
 - [ ]   19. 包括的テストスイートの実装
     - **フレームワーク設定**
-        - Jestテストフレームワーク導入
-        - React Testing Libraryセットアップ
-        - package.jsonにテストスクリプト追加（test, test:watch, test:coverage）
+        - Vitestテストフレームワーク設定確認（既存設定の活用）
+        - React Testing Libraryセットアップ確認
+        - package.jsonにテストスクリプト追加（test, test:watch, test:coverage, test:ui）
     - **単体テスト実装**
-        - Zodスキーマの単体テスト作成
+        - Zodスキーマの単体テスト作成（Vitest + describe/it/expect）
         - 各UIコンポーネントのユニットテスト作成
         - GitHub風コンポーネントのテスト実装
-        - Jest + React Testing Library による単体テストの作成
+        - Vitest + React Testing Library による単体テストの作成
     - **統合・E2Eテスト**
-        - Chrome Extension APIs のモックテストの実装
+        - Chrome Extension APIs のモックテスト（vi.mock使用）の実装
         - バリデーション機能の統合テスト実装
-        - E2Eテスト（Playwright）の実装
+        - Vitestのブラウザモードを活用したE2Eテスト実装
     - **品質保証**
-        - テストカバレッジ80%以上の達成
+        - テストカバレッジ80%以上の達成（vitest --coverage）
         - CI/CDパイプラインでのテスト自動実行
     - _要件: 全要件のテスト検証_
 
@@ -193,7 +193,7 @@
 
 ### Phase 2: テスト実装
 
-- Jest + React Testing Library セットアップ
+- Vitest + React Testing Library セットアップ確認
 - 基本テストケース作成
 - カバレッジ80%以上達成
 
@@ -216,8 +216,8 @@
 各タスク完了後は以下を実行：
 
 ```bash
-pnpm exec tsc --noEmit  # 型チェック
+pnpm typecheck          # TypeScript型チェック
 pnpm lint               # コード品質チェック
-pnpm test               # テスト実行
+pnpm test               # Vitestテスト実行
 pnpm build              # ビルド確認
 ```

@@ -505,10 +505,10 @@ export function useValidatedStorage<T>(
 
 ## テスト戦略
 
-### 1. Zodスキーマテスト
+### 1. Zodスキーマテスト（Vitest）
 
 ```typescript
-// __tests__/schemas/repository.test.ts
+// src/lib/__tests__/schemas/repository.test.ts
 import { describe, expect, it } from 'vitest'
 
 import { RepositorySchema } from '@/lib/schemas'
@@ -551,10 +551,10 @@ describe('RepositorySchema', () => {
 })
 ```
 
-### 2. 統合テスト（バリデーション付き）
+### 2. 統合テスト（Vitest + バリデーション付き）
 
 ```typescript
-// __tests__/integration/api.test.ts
+// src/lib/__tests__/integration/api.test.ts
 import { describe, expect, it, vi } from 'vitest'
 
 import { fetchRepositories } from '@/lib/github-api'
@@ -581,6 +581,36 @@ describe('GitHub API Integration', () => {
         repositories.forEach((repo) => {
             expect(() => RepositorySchema.parse(repo)).not.toThrow()
         })
+    })
+})
+```
+
+### 3. コンポーネントテスト（Vitest + React Testing Library）
+
+```typescript
+// src/components/__tests__/github/button.test.tsx
+import { render, screen } from '@testing-library/react'
+import { describe, expect, it } from 'vitest'
+
+import { Button } from '@/components/github/button'
+
+describe('Button Component', () => {
+    it('should render with correct variant styles', () => {
+        render(<Button variant="primary">Test Button</Button>)
+
+        const button = screen.getByRole('button', { name: 'Test Button' })
+        expect(button).toBeInTheDocument()
+        expect(button).toHaveClass('bg-blue-600')
+    })
+
+    it('should handle click events', async () => {
+        const handleClick = vi.fn()
+        render(<Button onClick={handleClick}>Click me</Button>)
+
+        const button = screen.getByRole('button', { name: 'Click me' })
+        await user.click(button)
+
+        expect(handleClick).toHaveBeenCalledOnce()
     })
 })
 ```
