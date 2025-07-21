@@ -1,4 +1,4 @@
-import { z } from 'zod'
+import * as z from 'zod'
 
 // Basic Repository Schema for initial setup
 export const RepositoryOwnerSchema = z.object({
@@ -55,6 +55,68 @@ export function safeValidateData<T>(
     return result
 }
 
+// Authentication Schemas
+export const GitHubTokenSchema = z.object({
+    access_token: z.string().min(1),
+    token_type: z.literal('bearer').default('bearer'),
+    scope: z.string(),
+    created_at: z.iso.datetime(),
+    expires_at: z.iso.datetime().optional(),
+})
+
+export const AuthStateSchema = z.object({
+    isAuthenticated: z.boolean(),
+    token: GitHubTokenSchema.optional(),
+    user: z
+        .object({
+            login: z.string(),
+            id: z.number(),
+            avatar_url: z.url(),
+            name: z.string().nullable(),
+            email: z.email().nullable(),
+        })
+        .optional(),
+    lastValidated: z.iso.datetime().optional(),
+})
+
+export const GitHubUserSchema = z.object({
+    login: z.string(),
+    id: z.number(),
+    node_id: z.string(),
+    avatar_url: z.url(),
+    gravatar_id: z.string().nullable(),
+    url: z.url(),
+    html_url: z.url(),
+    followers_url: z.url(),
+    following_url: z.url(),
+    gists_url: z.url(),
+    starred_url: z.url(),
+    subscriptions_url: z.url(),
+    organizations_url: z.url(),
+    repos_url: z.url(),
+    events_url: z.url(),
+    received_events_url: z.url(),
+    type: z.string(),
+    site_admin: z.boolean(),
+    name: z.string().nullable(),
+    company: z.string().nullable(),
+    blog: z.string().nullable(),
+    location: z.string().nullable(),
+    email: z.email().nullable(),
+    hireable: z.boolean().nullable(),
+    bio: z.string().nullable(),
+    twitter_username: z.string().nullable(),
+    public_repos: z.number(),
+    public_gists: z.number(),
+    followers: z.number(),
+    following: z.number(),
+    created_at: z.iso.datetime(),
+    updated_at: z.iso.datetime(),
+})
+
 // Type inference from Zod schemas
 export type Repository = z.infer<typeof RepositorySchema>
 export type RepositoryOwner = z.infer<typeof RepositoryOwnerSchema>
+export type GitHubToken = z.infer<typeof GitHubTokenSchema>
+export type AuthState = z.infer<typeof AuthStateSchema>
+export type GitHubUser = z.infer<typeof GitHubUserSchema>

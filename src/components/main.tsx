@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { memo, useCallback, useState } from 'react'
 
 import { Providers } from '@/components/providers'
 
@@ -10,8 +10,17 @@ interface Props {
     name?: string
 }
 
-export const Main = ({ name = 'Extension' }: Readonly<Props>) => {
+export const Main = memo(function Main({
+    name = 'Extension',
+}: Readonly<Props>) {
     const [data, setData] = useState('')
+
+    const handleInputChange = useCallback(
+        (e: React.ChangeEvent<HTMLInputElement>) => {
+            setData(e.target.value)
+        },
+        []
+    )
 
     return (
         <Providers>
@@ -20,10 +29,10 @@ export const Main = ({ name = 'Extension' }: Readonly<Props>) => {
                     Welcome to your <a href="https://www.plasmo.com">Plasmo</a>{' '}
                     {name}!
                 </h1>
-                <input onChange={(e) => setData(e.target.value)} value={data} />
+                <input onChange={handleInputChange} value={data} />
 
                 <a href="https://docs.plasmo.com">READ THE DOCS!</a>
             </div>
         </Providers>
     )
-}
+})

@@ -1,3 +1,5 @@
+import { memo, useMemo } from 'react'
+
 import { IssueClosedIcon, IssueOpenedIcon } from '@primer/octicons-react'
 
 import { Badge } from '@/components/ui/badge'
@@ -13,25 +15,29 @@ interface IssueItemProps {
     }>
 }
 
-export function IssueItem({
+const getLabelColor = (type: string) => {
+    switch (type) {
+        case 'enhancement':
+            return 'bg-github-success-fg/10 text-github-success-fg border-github-success-fg/20'
+        case 'bug':
+            return 'bg-github-danger-fg/10 text-github-danger-fg border-github-danger-fg/20'
+        case 'feature':
+            return 'bg-primary/10 text-primary border-primary/20'
+        default:
+            return 'bg-muted text-muted-foreground'
+    }
+}
+
+export const IssueItem = memo(function IssueItem({
     title,
     number,
     author,
     status,
     labels,
 }: IssueItemProps) {
-    const getLabelColor = (type: string) => {
-        switch (type) {
-            case 'enhancement':
-                return 'bg-github-success-fg/10 text-github-success-fg border-github-success-fg/20'
-            case 'bug':
-                return 'bg-github-danger-fg/10 text-github-danger-fg border-github-danger-fg/20'
-            case 'feature':
-                return 'bg-primary/10 text-primary border-primary/20'
-            default:
-                return 'bg-muted text-muted-foreground'
-        }
-    }
+    const statusText = useMemo(() => {
+        return status === 'open' ? 'opened' : 'closed'
+    }, [status])
 
     return (
         <div className="border-border hover:bg-muted/5 flex items-start gap-3 border-b p-3 transition-colors">
@@ -54,8 +60,7 @@ export function IssueItem({
                     {title}
                 </h4>
                 <p className="text-muted-foreground text-sm">
-                    #{number} {status === 'open' ? 'opened' : 'closed'} by{' '}
-                    {author}
+                    #{number} {statusText} by {author}
                 </p>
             </div>
 
@@ -72,4 +77,4 @@ export function IssueItem({
             </div>
         </div>
     )
-}
+})
