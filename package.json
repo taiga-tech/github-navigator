@@ -2,8 +2,8 @@
     "name": "github-navigator",
     "description": "A basic Plasmo extension.",
     "version": "0.0.1",
-    "type": "module",
     "author": "taiga-tech <>",
+    "type": "module",
     "scripts": {
         "start": "next start",
         "dev": "run-p dev:*",
@@ -74,6 +74,9 @@
         "@plasmohq/rps": "1.8.7",
         "@plasmohq/storage": "1.15.0",
         "@tailwindcss/postcss": "^4.1.11",
+        "@testing-library/jest-dom": "^6.6.3",
+        "@testing-library/react": "^16.3.0",
+        "@testing-library/user-event": "^14.6.1",
         "@trivago/prettier-plugin-sort-imports": "^5.2.2",
         "@types/chrome": "0.1.1",
         "@types/node": "24.0.15",
@@ -81,9 +84,6 @@
         "@types/react-dom": "19.1.6",
         "@typescript-eslint/eslint-plugin": "^8.37.0",
         "@typescript-eslint/parser": "^8.37.0",
-        "@testing-library/react": "^16.1.0",
-        "@testing-library/jest-dom": "^6.6.3",
-        "@testing-library/user-event": "^14.5.2",
         "@vitest/coverage-v8": "^3.2.4",
         "@vitest/ui": "^3.2.4",
         "autoprefixer": "^10.4.21",
@@ -126,6 +126,12 @@
         "patchedDependencies": {
             "jiti": "patches/jiti.patch",
             "@tailwindcss/oxide": "patches/@tailwindcss__oxide.patch"
+        },
+        "overrides": {
+            "msgpackr": "^1.10.1",
+            "cross-spawn": "^7.0.5",
+            "svelte": "^4.2.19",
+            "esbuild": "^0.25.0"
         }
     }
 }
