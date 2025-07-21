@@ -7,10 +7,8 @@ on:
         branches: [main, develop]
 
 env:
-    # Use Node.js 18.x for better compatibility
-    NODE_VERSION: '18.x'
-    # Use specific pnpm version for consistency
-    PNPM_VERSION: '10.13.1'
+    # Use Node.js 20.x for better compatibility
+    NODE_VERSION: '20.x'
 
 jobs:
     # Job 1: Code Quality Checks
@@ -25,10 +23,8 @@ jobs:
               with:
                   fetch-depth: 0 # Full history for better analysis
 
-            - name: 'Setup pnpm'
-              uses: pnpm/action-setup@v4
-              with:
-                  version: ${{ env.PNPM_VERSION }}
+            - name: 'Enable corepack'
+              run: corepack enable
 
             - name: 'Setup Node.js'
               uses: actions/setup-node@v4
@@ -59,10 +55,8 @@ jobs:
             - name: 'Checkout repository'
               uses: actions/checkout@v4
 
-            - name: 'Setup pnpm'
-              uses: pnpm/action-setup@v4
-              with:
-                  version: ${{ env.PNPM_VERSION }}
+            - name: 'Enable corepack'
+              run: corepack enable
 
             - name: 'Setup Node.js'
               uses: actions/setup-node@v4
@@ -100,10 +94,8 @@ jobs:
             - name: 'Checkout repository'
               uses: actions/checkout@v4
 
-            - name: 'Setup pnpm'
-              uses: pnpm/action-setup@v4
-              with:
-                  version: ${{ env.PNPM_VERSION }}
+            - name: 'Enable corepack'
+              run: corepack enable
 
             - name: 'Setup Node.js'
               uses: actions/setup-node@v4
@@ -166,10 +158,8 @@ jobs:
             - name: 'Checkout repository'
               uses: actions/checkout@v4
 
-            - name: 'Setup pnpm'
-              uses: pnpm/action-setup@v4
-              with:
-                  version: ${{ env.PNPM_VERSION }}
+            - name: 'Enable corepack'
+              run: corepack enable
 
             - name: 'Setup Node.js'
               uses: actions/setup-node@v4
@@ -205,10 +195,8 @@ jobs:
             - name: 'Checkout repository'
               uses: actions/checkout@v4
 
-            - name: 'Setup pnpm'
-              uses: pnpm/action-setup@v4
-              with:
-                  version: ${{ env.PNPM_VERSION }}
+            - name: 'Enable corepack'
+              run: corepack enable
 
             - name: 'Setup Node.js'
               uses: actions/setup-node@v4
@@ -271,10 +259,8 @@ jobs:
             - name: 'Checkout repository'
               uses: actions/checkout@v4
 
-            - name: 'Setup pnpm'
-              uses: pnpm/action-setup@v4
-              with:
-                  version: ${{ env.PNPM_VERSION }}
+            - name: 'Enable corepack'
+              run: corepack enable
 
             - name: 'Setup Node.js'
               uses: actions/setup-node@v4
