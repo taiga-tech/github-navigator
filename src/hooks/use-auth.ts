@@ -5,6 +5,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useStorage } from '@plasmohq/storage/hook'
 
 import {
+    AuthError,
     authenticateWithGitHub,
     clearAuthState,
     getAuthState,
@@ -14,16 +15,113 @@ import {
     signOut,
 } from '@/lib/auth'
 
+// Enhanced error types for better error handling
+interface AuthErrorDetails {
+    code: string
+    message: string
+    type: 'network' | 'config' | 'auth' | 'rate_limit' | 'unknown'
+    isRetryable: boolean
+}
+
+// Parse error into structured format
+function parseAuthError(error: unknown): AuthErrorDetails {
+    if (error instanceof AuthError) {
+        let type: AuthErrorDetails['type'] = 'auth'
+        let isRetryable = false
+
+        switch (error.code) {
+            case 'CHROME_IDENTITY_UNAVAILABLE':
+            case 'MISSING_CLIENT_ID':
+            case 'MISSING_CLIENT_SECRET':
+            case 'CONFIG_VALIDATION_ERROR':
+                type = 'config'
+                isRetryable = false
+                break
+            case 'TOKEN_EXCHANGE_ERROR':
+            case 'USER_FETCH_ERROR':
+                type = 'auth'
+                isRetryable = error.status ? error.status >= 500 : false
+                break
+            case 'OAUTH_FLOW_ERROR':
+                type = 'auth'
+                isRetryable = true
+                break
+            default:
+                type = 'unknown'
+                isRetryable = true
+        }
+
+        return {
+            code: error.code,
+            message: error.message,
+            type,
+            isRetryable,
+        }
+    }
+
+    if (error instanceof Error) {
+        // Network errors are typically retryable
+        const isNetworkError =
+            error.message.toLowerCase().includes('network') ||
+            error.message.toLowerCase().includes('fetch') ||
+            error.message.toLowerCase().includes('connection')
+
+        return {
+            code: 'UNKNOWN_ERROR',
+            message: error.message,
+            type: isNetworkError ? 'network' : 'unknown',
+            isRetryable: isNetworkError,
+        }
+    }
+
+    return {
+        code: 'UNKNOWN_ERROR',
+        message: 'An unexpected error occurred',
+        type: 'unknown',
+        isRetryable: true,
+    }
+}
+
+// Show notification if available
+function showNotification(
+    title: string,
+    message: string,
+    type: 'info' | 'error' = 'error'
+): void {
+    if (typeof chrome !== 'undefined' && chrome.notifications) {
+        // TODO: Use a more appropriate icon based on the type
+        const icon = chrome.runtime.getURL(
+            chrome.runtime.getManifest().icons['48']
+        )
+        const iconUrl = type === 'error' ? icon : icon
+
+        chrome.notifications
+            .create({
+                type: 'basic',
+                iconUrl,
+                title,
+                message,
+            })
+            .catch((err) => {
+                console.warn('Failed to show notification:', err)
+            })
+    }
+}
+
 export interface UseAuthReturn {
     authState: AuthState | null
     isLoading: boolean
     isAuthenticated: boolean
     isTokenExpiring: boolean
     error: string | null
+    errorDetails: AuthErrorDetails | null
+    retryCount: number
+    canRetry: boolean
     signIn: () => Promise<void>
     signOut: () => Promise<void>
     refreshAuthState: () => Promise<void>
     clearError: () => void
+    retryLastOperation: () => Promise<void>
 }
 
 export function useAuth(): UseAuthReturn {
@@ -34,6 +132,13 @@ export function useAuth(): UseAuthReturn {
     const [isLoading, setIsLoading] = useState(false)
     const [isTokenExpiring, setIsTokenExpiring] = useState(false)
     const [error, setError] = useState<string | null>(null)
+    const [errorDetails, setErrorDetails] = useState<AuthErrorDetails | null>(
+        null
+    )
+    const [retryCount, setRetryCount] = useState(0)
+    const [lastOperation, setLastOperation] = useState<
+        'signIn' | 'refreshAuth' | null
+    >(null)
 
     // Computed authentication status
     const [computedIsAuthenticated, setComputedIsAuthenticated] =
@@ -54,24 +159,176 @@ export function useAuth(): UseAuthReturn {
         }
     }, [])
 
+    // Enhanced error handling
+    const handleError = useCallback(
+        (err: unknown, operation?: 'signIn' | 'refreshAuth') => {
+            const errorInfo = parseAuthError(err)
+            setError(errorInfo.message)
+            setErrorDetails(errorInfo)
+
+            if (operation) {
+                setLastOperation(operation)
+            }
+
+            // Show notification for critical errors
+            if (errorInfo.type === 'config') {
+                showNotification(
+                    'Configuration Error',
+                    'There is an issue with GitHub OAuth settings. Please contact your administrator.',
+                    'error'
+                )
+            } else if (errorInfo.type === 'network') {
+                showNotification(
+                    'Network Error',
+                    'There is a network connection issue. Please try again later.',
+                    'error'
+                )
+            } else if (errorInfo.type === 'rate_limit') {
+                showNotification(
+                    'Rate Limit Exceeded',
+                    'API usage limit has been reached. Please wait a moment before trying again.',
+                    'error'
+                )
+            }
+
+            console.error(
+                `Authentication ${operation || 'operation'} failed:`,
+                err
+            )
+        },
+        []
+    )
+
+    // Clear error and reset retry state
+    const clearError = useCallback(() => {
+        setError(null)
+        setErrorDetails(null)
+        setRetryCount(0)
+        setLastOperation(null)
+    }, [])
+
+    // Retry last operation with exponential backoff
+    const retryLastOperation = useCallback(async () => {
+        if (!lastOperation || !errorDetails?.isRetryable) {
+            return
+        }
+
+        const maxRetries = 3
+        if (retryCount >= maxRetries) {
+            showNotification(
+                'Retry Limit Reached',
+                'Maximum retry attempts reached. Please wait a moment before trying again.',
+                'error'
+            )
+            return
+        }
+
+        // Exponential backoff delay
+        const delay = Math.pow(2, retryCount) * 1000 // 1s, 2s, 4s...
+
+        if (delay > 1000) {
+            showNotification(
+                'Retrying',
+                `Retrying in ${delay / 1000} seconds...`,
+                'info'
+            )
+            await new Promise((resolve) => setTimeout(resolve, delay))
+        }
+
+        setRetryCount((prev) => prev + 1)
+
+        if (lastOperation === 'signIn') {
+            // Re-execute sign in operation
+            setIsLoading(true)
+            try {
+                const newAuthState = await authenticateWithGitHub()
+                setAuthState(newAuthState)
+                await updateAuthenticationStatus()
+
+                // Success notification
+                showNotification(
+                    'Authentication Successful',
+                    'GitHub account authentication completed successfully.',
+                    'info'
+                )
+
+                // Reset retry count on success
+                setRetryCount(0)
+                setLastOperation(null)
+            } catch (err) {
+                handleError(err, 'signIn')
+            } finally {
+                setIsLoading(false)
+            }
+        } else if (lastOperation === 'refreshAuth') {
+            // Re-execute refresh auth operation
+            setIsLoading(true)
+            try {
+                const currentAuthState = await getAuthState()
+                setAuthState(currentAuthState)
+
+                // Check if token is still valid
+                if (currentAuthState && currentAuthState.isAuthenticated) {
+                    const valid = await isTokenValid()
+                    if (!valid) {
+                        await clearAuthState()
+                        setAuthState(null)
+                        setComputedIsAuthenticated(false)
+
+                        showNotification(
+                            'Session Expired',
+                            'Your GitHub session has expired. Please log in again.',
+                            'info'
+                        )
+                    } else {
+                        setComputedIsAuthenticated(true)
+                    }
+                } else {
+                    setComputedIsAuthenticated(false)
+                }
+
+                await updateAuthenticationStatus()
+            } catch (err) {
+                handleError(err, 'refreshAuth')
+            } finally {
+                setIsLoading(false)
+            }
+        }
+    }, [
+        errorDetails?.isRetryable,
+        lastOperation,
+        retryCount,
+        setAuthState,
+        handleError,
+        updateAuthenticationStatus,
+    ])
+
     // Sign in with GitHub
     const signIn = useCallback(async () => {
         setIsLoading(true)
-        setError(null)
+        clearError()
 
         try {
             const newAuthState = await authenticateWithGitHub()
             setAuthState(newAuthState)
             await updateAuthenticationStatus()
+
+            // Success notification
+            showNotification(
+                'Authentication Successful',
+                'GitHub account authentication completed successfully.',
+                'info'
+            )
+
+            // Reset retry count on success
+            setRetryCount(0)
+            setLastOperation(null)
         } catch (err) {
-            const errorMessage =
-                err instanceof Error ? err.message : 'Authentication failed'
-            setError(errorMessage)
-            console.error('Sign in failed:', err)
+            handleError(err, 'signIn')
         } finally {
             setIsLoading(false)
         }
-    }, [setAuthState, updateAuthenticationStatus])
+    }, [setAuthState, updateAuthenticationStatus, handleError, clearError])
 
     // Sign out
     const handleSignOut = useCallback(async () => {
@@ -95,7 +352,7 @@ export function useAuth(): UseAuthReturn {
     // Refresh authentication state
     const refreshAuthState = useCallback(async () => {
         setIsLoading(true)
-        setError(null)
+        clearError()
 
         try {
             const currentAuthState = await getAuthState()
@@ -108,6 +365,12 @@ export function useAuth(): UseAuthReturn {
                     await clearAuthState()
                     setAuthState(null)
                     setComputedIsAuthenticated(false)
+
+                    showNotification(
+                        'Session Expired',
+                        'Your GitHub session has expired. Please log in again.',
+                        'info'
+                    )
                 } else {
                     setComputedIsAuthenticated(true)
                 }
@@ -117,21 +380,11 @@ export function useAuth(): UseAuthReturn {
 
             await updateAuthenticationStatus()
         } catch (err) {
-            const errorMessage =
-                err instanceof Error
-                    ? err.message
-                    : 'Failed to refresh auth state'
-            setError(errorMessage)
-            console.error('Failed to refresh auth state:', err)
+            handleError(err, 'refreshAuth')
         } finally {
             setIsLoading(false)
         }
-    }, [setAuthState, updateAuthenticationStatus])
-
-    // Clear error
-    const clearError = useCallback(() => {
-        setError(null)
-    }, [])
+    }, [setAuthState, updateAuthenticationStatus, handleError, clearError])
 
     // Check if token is expiring (within 30 days)
     const checkTokenExpiration = useCallback(async () => {
@@ -220,15 +473,25 @@ export function useAuth(): UseAuthReturn {
         [computedIsAuthenticated, authState?.isAuthenticated]
     )
 
+    // Compute retry capability
+    const canRetry = useMemo(
+        () => errorDetails?.isRetryable === true && retryCount < 3,
+        [errorDetails?.isRetryable, retryCount]
+    )
+
     return {
         authState,
         isLoading,
         isAuthenticated: finalIsAuthenticated,
         isTokenExpiring,
         error,
+        errorDetails,
+        retryCount,
+        canRetry,
         signIn,
         signOut: handleSignOut,
         refreshAuthState,
         clearError,
+        retryLastOperation,
     }
 }

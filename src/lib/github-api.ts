@@ -8,17 +8,73 @@ export class GitHubAPIError extends Error {
     constructor(
         message: string,
         public status: number,
-        public response?: Record<string, unknown>
+        public response?: Record<string, unknown>,
+        public isRetryable: boolean = false
     ) {
         super(message)
         this.name = 'GitHubAPIError'
     }
 }
 
-// Generic GitHub API request function
+// Rate limit state tracking
+interface RateLimitState {
+    resetTime: number
+    remaining: number
+    limit: number
+}
+
+let rateLimitState: RateLimitState | null = null
+
+// Update rate limit state from response headers
+function updateRateLimitState(response: Response): void {
+    try {
+        const limit = response.headers.get('X-RateLimit-Limit')
+        const remaining = response.headers.get('X-RateLimit-Remaining')
+        const reset = response.headers.get('X-RateLimit-Reset')
+
+        if (limit && remaining && reset) {
+            rateLimitState = {
+                limit: parseInt(limit, 10),
+                remaining: parseInt(remaining, 10),
+                resetTime: parseInt(reset, 10) * 1000, // Convert to milliseconds
+            }
+        }
+    } catch (error) {
+        console.warn('Failed to parse rate limit headers:', error)
+    }
+}
+
+// Check if we're approaching rate limit
+function isApproachingRateLimit(): boolean {
+    if (!rateLimitState) return false
+
+    // Consider approaching limit when less than 10% remaining
+    const threshold = Math.max(1, Math.floor(rateLimitState.limit * 0.1))
+    return rateLimitState.remaining <= threshold
+}
+
+// Wait for rate limit reset if needed
+async function waitForRateLimitReset(): Promise<void> {
+    if (!rateLimitState || rateLimitState.remaining > 0) {
+        return
+    }
+
+    const now = Date.now()
+    if (now < rateLimitState.resetTime) {
+        const waitTime = rateLimitState.resetTime - now
+        console.warn(
+            `Rate limit exceeded. Waiting ${waitTime}ms until reset...`
+        )
+        await new Promise((resolve) => setTimeout(resolve, waitTime))
+        rateLimitState = null // Reset state after waiting
+    }
+}
+
+// Generic GitHub API request function with enhanced error handling and retry logic
 async function githubRequest<T>(
     endpoint: string,
-    options: RequestInit = {}
+    options: RequestInit = {},
+    maxRetries: number = 3
 ): Promise<T> {
     const token = await getAccessToken()
 
@@ -26,31 +82,116 @@ async function githubRequest<T>(
         throw new GitHubAPIError('No access token available', 401)
     }
 
+    // Check rate limit before making request
+    await waitForRateLimitReset()
+
     const url = endpoint.startsWith('http')
         ? endpoint
         : `${GITHUB_API_BASE}${endpoint}`
 
-    const response = await fetch(url, {
-        ...options,
-        headers: {
-            Authorization: `Bearer ${token}`,
-            Accept: 'application/vnd.github.v3+json',
-            'User-Agent': 'GitHub-Navigator-Extension',
-            ...options.headers,
-        },
-    })
+    for (let attempt = 1; attempt <= maxRetries; attempt++) {
+        try {
+            // Warn if approaching rate limit
+            if (isApproachingRateLimit()) {
+                console.warn('Approaching GitHub API rate limit')
+            }
 
-    if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}))
-        throw new GitHubAPIError(
-            errorData.message ||
-                `GitHub API request failed: ${response.status}`,
-            response.status,
-            errorData
-        )
+            const response = await fetch(url, {
+                ...options,
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                    Accept: 'application/vnd.github.v3+json',
+                    'X-GitHub-Api-Version': '2022-11-28',
+                    'User-Agent': 'GitHub-Navigator-Extension',
+                    ...options.headers,
+                },
+            })
+
+            // Update rate limit state from response
+            updateRateLimitState(response)
+
+            if (response.ok) {
+                return await response.json()
+            }
+
+            // Handle specific error cases
+            const errorData = await response.json().catch(() => ({}))
+            let errorMessage =
+                errorData.message ||
+                `GitHub API request failed: ${response.status}`
+            let isRetryable = false
+
+            if (response.status === 401) {
+                errorMessage = 'Invalid or expired access token'
+                isRetryable = false
+            } else if (response.status === 403) {
+                const remaining = response.headers.get('X-RateLimit-Remaining')
+                if (remaining === '0') {
+                    errorMessage =
+                        'Rate limit exceeded. Please try again later.'
+                    isRetryable = true
+                    // Wait for rate limit reset before retrying
+                    await waitForRateLimitReset()
+                } else {
+                    errorMessage =
+                        'Access forbidden. Token may have insufficient permissions.'
+                    isRetryable = false
+                }
+            } else if (response.status === 404) {
+                errorMessage = 'Resource not found'
+                isRetryable = false
+            } else if (response.status >= 500) {
+                errorMessage =
+                    'GitHub API server error. Please try again later.'
+                isRetryable = true
+            } else if (response.status === 422) {
+                errorMessage = 'Validation failed'
+                isRetryable = false
+            }
+
+            // Retry for retryable errors
+            if (isRetryable && attempt < maxRetries) {
+                const delay = Math.pow(2, attempt - 1) * 1000 // Exponential backoff: 1s, 2s, 4s
+                console.warn(
+                    `GitHub API request failed (${response.status}), retrying in ${delay}ms... (attempt ${attempt}/${maxRetries})`
+                )
+                await new Promise((resolve) => setTimeout(resolve, delay))
+                continue
+            }
+
+            throw new GitHubAPIError(
+                errorMessage,
+                response.status,
+                errorData,
+                isRetryable
+            )
+        } catch (error) {
+            // Network or other errors
+            if (error instanceof GitHubAPIError) {
+                throw error
+            }
+
+            if (attempt < maxRetries) {
+                const delay = Math.pow(2, attempt - 1) * 1000
+                console.warn(
+                    `Network error during GitHub API request, retrying in ${delay}ms... (attempt ${attempt}/${maxRetries})`
+                )
+                console.error(error)
+                await new Promise((resolve) => setTimeout(resolve, delay))
+                continue
+            }
+
+            throw new GitHubAPIError(
+                `Network error: ${error instanceof Error ? error.message : 'Unknown error'}`,
+                0,
+                undefined,
+                true
+            )
+        }
     }
 
-    return response.json()
+    // This should never be reached, but TypeScript requires it
+    throw new GitHubAPIError('Maximum retries exceeded', 0, undefined, false)
 }
 
 // Test the GitHub API connection

@@ -11,9 +11,61 @@ import {
     validateData,
 } from '@/lib/schemas'
 
-// GitHub OAuth configuration
-const GITHUB_CLIENT_ID = process.env.PLASMO_PUBLIC_GITHUB_CLIENT_ID
-const GITHUB_CLIENT_SECRET = process.env.PLASMO_PUBLIC_GITHUB_CLIENT_SECRET
+// GitHub OAuth configuration with validation
+function validateEnvironmentVariables(): {
+    clientId: string
+    clientSecret: string
+} {
+    const clientId = process.env.PLASMO_PUBLIC_GITHUB_CLIENT_ID
+    const clientSecret = process.env.PLASMO_PUBLIC_GITHUB_CLIENT_SECRET
+
+    if (!clientId) {
+        throw new AuthError(
+            'GitHub Client ID is not configured. Please set PLASMO_PUBLIC_GITHUB_CLIENT_ID environment variable.',
+            'MISSING_CLIENT_ID'
+        )
+    }
+
+    if (!clientSecret) {
+        throw new AuthError(
+            'GitHub Client Secret is not configured. Please set PLASMO_PUBLIC_GITHUB_CLIENT_SECRET environment variable.',
+            'MISSING_CLIENT_SECRET'
+        )
+    }
+
+    // Basic validation for GitHub Client ID format
+    if (!clientId.match(/^[A-Za-z0-9]{20}$/)) {
+        console.warn(
+            'GitHub Client ID format may be invalid. Expected 20 alphanumeric characters.'
+        )
+    }
+
+    // Basic validation for GitHub Client Secret format
+    if (!clientSecret.match(/^[A-Za-z0-9]{40}$/)) {
+        console.warn(
+            'GitHub Client Secret format may be invalid. Expected 40 alphanumeric characters.'
+        )
+    }
+
+    return { clientId, clientSecret }
+}
+
+// Get validated environment variables
+function getGitHubConfig() {
+    try {
+        return validateEnvironmentVariables()
+    } catch (error) {
+        if (error instanceof AuthError) {
+            console.error('Environment configuration error:', error.message)
+            throw error
+        }
+        throw new AuthError(
+            'Failed to validate GitHub OAuth configuration',
+            'CONFIG_VALIDATION_ERROR'
+        )
+    }
+}
+
 const GITHUB_SCOPES = ['notifications', 'public_repo', 'repo', 'user:email']
 
 // Get redirect URI safely
@@ -69,10 +121,11 @@ export async function authenticateWithGitHub(): Promise<AuthState> {
         }
 
         // Step 1: Get authorization code via Chrome Identity API
+        const { clientId } = getGitHubConfig()
         const redirectUri = getRedirectURI()
         const authUrl =
             `https://github.com/login/oauth/authorize?` +
-            `client_id=${GITHUB_CLIENT_ID}&` +
+            `client_id=${clientId}&` +
             `redirect_uri=${encodeURIComponent(redirectUri)}&` +
             `scope=${GITHUB_SCOPES.join(' ')}&` +
             `state=${generateRandomState()}`
@@ -167,6 +220,8 @@ export async function authenticateWithGitHub(): Promise<AuthState> {
 
 // Exchange authorization code for access token
 async function exchangeCodeForToken(code: string): Promise<GitHubToken> {
+    const { clientId, clientSecret } = getGitHubConfig()
+
     const response = await fetch(
         'https://github.com/login/oauth/access_token',
         {
@@ -176,8 +231,8 @@ async function exchangeCodeForToken(code: string): Promise<GitHubToken> {
                 'Content-Type': 'application/json',
             },
             body: JSON.stringify({
-                client_id: GITHUB_CLIENT_ID,
-                client_secret: GITHUB_CLIENT_SECRET,
+                client_id: clientId,
+                client_secret: clientSecret,
                 code,
             }),
         }
@@ -215,22 +270,38 @@ async function exchangeCodeForToken(code: string): Promise<GitHubToken> {
     return validateData(GitHubTokenSchema, tokenData, 'GitHub token')
 }
 
-// Fetch GitHub user information
+// Fetch GitHub user information with enhanced error handling
 async function fetchGitHubUser(accessToken: string): Promise<GitHubUser> {
     const response = await fetch('https://api.github.com/user', {
         headers: {
             Authorization: `Bearer ${accessToken}`,
             Accept: 'application/vnd.github.v3+json',
+            'X-GitHub-Api-Version': '2022-11-28',
             'User-Agent': 'GitHub-Navigator-Extension',
         },
     })
 
+    // Update rate limit state
+    updateRateLimitState(response)
+
     if (!response.ok) {
-        throw new AuthError(
-            'Failed to fetch user information',
-            'USER_FETCH_ERROR',
-            response.status
-        )
+        let errorMessage = 'Failed to fetch user information'
+
+        if (response.status === 401) {
+            errorMessage = 'Invalid or expired access token'
+        } else if (response.status === 403) {
+            const remaining = response.headers.get('X-RateLimit-Remaining')
+            if (remaining === '0') {
+                errorMessage = 'Rate limit exceeded. Please try again later.'
+            } else {
+                errorMessage =
+                    'Access forbidden. Token may have insufficient permissions.'
+            }
+        } else if (response.status >= 500) {
+            errorMessage = 'GitHub API server error. Please try again later.'
+        }
+
+        throw new AuthError(errorMessage, 'USER_FETCH_ERROR', response.status)
     }
 
     const userData = await response.json()
@@ -264,21 +335,123 @@ export async function getAuthState(): Promise<AuthState | null> {
     }
 }
 
-// Validate token with GitHub API
-export async function validateToken(token: string): Promise<boolean> {
-    try {
-        const response = await fetch('https://api.github.com/user', {
-            headers: {
-                Authorization: `Bearer ${token}`,
-                Accept: 'application/vnd.github.v3+json',
-                'User-Agent': 'GitHub-Navigator-Extension',
-            },
-        })
+// Rate limit state tracking
+interface RateLimitState {
+    resetTime: number
+    remaining: number
+    limit: number
+}
 
-        return response.ok
+let rateLimitState: RateLimitState | null = null
+
+// Validate token with GitHub API with enhanced error handling
+export async function validateToken(
+    token: string,
+    maxRetries: number = 3
+): Promise<boolean> {
+    for (let attempt = 1; attempt <= maxRetries; attempt++) {
+        try {
+            // Check rate limit before making request
+            if (rateLimitState && rateLimitState.remaining <= 0) {
+                const now = Date.now()
+                if (now < rateLimitState.resetTime) {
+                    console.warn(
+                        `Rate limit exceeded. Reset at: ${new Date(
+                            rateLimitState.resetTime
+                        ).toISOString()}`
+                    )
+                    return false
+                }
+                // Reset rate limit state if time has passed
+                rateLimitState = null
+            }
+
+            const response = await fetch('https://api.github.com/user', {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                    Accept: 'application/vnd.github.v3+json',
+                    'X-GitHub-Api-Version': '2022-11-28',
+                    'User-Agent': 'GitHub-Navigator-Extension',
+                },
+            })
+
+            // Update rate limit state from response headers
+            updateRateLimitState(response)
+
+            if (response.ok) {
+                return true
+            }
+
+            // Handle specific error cases
+            if (response.status === 401) {
+                // Token is invalid, clear auth state
+                console.warn('Token is invalid (401), clearing auth state')
+                await clearAuthState()
+                return false
+            }
+
+            if (response.status === 403) {
+                // Check if it's a rate limit error
+                const remaining = response.headers.get('X-RateLimit-Remaining')
+                if (remaining === '0') {
+                    console.warn('Rate limit exceeded (403)')
+                    return false
+                }
+                // Other 403 errors (like suspended account)
+                console.warn('Access forbidden (403), token may be restricted')
+                return false
+            }
+
+            if (response.status >= 500 && attempt < maxRetries) {
+                // Server error, retry with exponential backoff
+                const delay = Math.pow(2, attempt - 1) * 1000 // 1s, 2s, 4s...
+                console.warn(
+                    `Server error (${response.status}), retrying in ${delay}ms... (attempt ${attempt}/${maxRetries})`
+                )
+                await new Promise((resolve) => setTimeout(resolve, delay))
+                continue
+            }
+
+            console.warn(
+                `Token validation failed with status: ${response.status}`
+            )
+            return false
+        } catch (error) {
+            // Network or other errors
+            if (attempt < maxRetries) {
+                const delay = Math.pow(2, attempt - 1) * 1000
+                console.warn(
+                    `Network error during token validation, retrying in ${delay}ms... (attempt ${attempt}/${maxRetries})`
+                )
+                console.error(error)
+                await new Promise((resolve) => setTimeout(resolve, delay))
+                continue
+            }
+
+            console.error('Token validation failed after all retries:', error)
+            return false
+        }
+    }
+
+    return false
+}
+
+// Update rate limit state from response headers
+function updateRateLimitState(response: Response): void {
+    try {
+        const limit = response.headers.get('X-RateLimit-Limit')
+        const remaining = response.headers.get('X-RateLimit-Remaining')
+        const reset = response.headers.get('X-RateLimit-Reset')
+
+        if (limit && remaining && reset) {
+            rateLimitState = {
+                limit: parseInt(limit, 10),
+                remaining: parseInt(remaining, 10),
+                resetTime: parseInt(reset, 10) * 1000, // Convert to milliseconds
+            }
+        }
     } catch (error) {
-        console.error('Token validation failed:', error)
-        return false
+        console.warn('Failed to parse rate limit headers:', error)
     }
 }
 
