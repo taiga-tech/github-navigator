@@ -1,3 +1,5 @@
+'use client'
+
 import type { AuthState } from '@/lib/schemas'
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
