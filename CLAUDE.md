@@ -6,6 +6,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 - 回答は全て日本語で行ってください。
 - コードの変更は、以下のプロジェクト概要と技術スタックに基づいて行ってください。
+- **重要**: コード変更後は必ず `pnpm typecheck` と `pnpm lint` を実行してください。
 
 ## プロジェクト概要
 
@@ -749,3 +750,54 @@ const [tab] = await chrome.tabs.query({ active: true, currentWindow: true })
 const storage = new Storage()
 await storage.set('key', value)
 ```
+
+## トラブルシューティング
+
+### よくある問題と解決法
+
+**型エラーが発生した場合:**
+
+```bash
+# TypeScript設定を確認
+pnpm typecheck
+
+# ESLintエラーを修正
+pnpm lint:fix
+```
+
+**拡張機能が動作しない場合:**
+
+1. `build/chrome-mv3-dev` ディレクトリを確認
+2. Chromeで拡張機能を再読み込み
+3. 開発サーバーが `localhost:3000` で動作しているか確認
+
+**スタイルが反映されない場合:**
+
+```bash
+# Tailwind CSSの再ビルド
+pnpm build
+
+# グローバルCSS変数の確認
+# src/styles/globals.css を確認
+```
+
+**shadcn/uiコンポーネントのインポートエラー:**
+
+```bash
+# コンポーネントの再インストール
+pnpm dlx shadcn@latest add [component-name] --overwrite
+```
+
+### デバッグ方法
+
+**Chrome拡張機能のデバッグ:**
+
+1. Chrome DevToolsでポップアップを検査
+2. Background Scriptのログを確認
+3. Chrome拡張機能管理画面でエラーログを確認
+
+**Next.jsアプリのデバッグ:**
+
+1. ブラウザで `http://localhost:1947` にアクセス
+2. React Developer Toolsを使用
+3. ネットワークタブでAPI通信を確認

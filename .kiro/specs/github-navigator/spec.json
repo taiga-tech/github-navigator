@@ -1,0 +1,45 @@
+{
+    "feature_name": "github-navigator",
+    "project_description": "@.docs 配下のファイルを参照して下さい",
+    "feature_summary": "Plasmo + Next.js + shadcn/ui によるGitHub管理Chrome拡張機能。リポジトリ中心のUIで通知管理、ショートカット機能、クイックアクセスを提供し、開発者の生産性向上を目指す。",
+    "created_at": "2025-01-29T08:00:00Z",
+    "updated_at": "2025-08-10T06:00:00Z",
+    "language": "japanese",
+    "phase": "implementation-ready",
+    "approvals": {
+        "requirements": {
+            "generated": true,
+            "approved": true
+        },
+        "design": {
+            "generated": true,
+            "approved": true
+        },
+        "tasks": {
+            "generated": true,
+            "approved": true
+        }
+    },
+    "ready_for_implementation": true,
+    "key_technologies": [
+        "Plasmo v0.90.5",
+        "React 19",
+        "TypeScript 5.8.3",
+        "Next.js 15.4.2",
+        "Tailwind CSS v4.1.11",
+        "shadcn/ui",
+        "Chrome Manifest V3",
+        "GitHub API"
+    ],
+    "main_features": [
+        "リポジトリ選択機能（オートコンプリート検索）",
+        "GitHub OAuth 2.0認証",
+        "通知管理（フィルタリング、既読管理）",
+        "カスタムショートカット機能",
+        "クイックアクセス（Issues/PR/ダッシュボード）",
+        "ダークモード対応",
+        "多言語対応（英語/日本語）"
+    ],
+    "target_users": "GitHubを日常的に使用するエンジニア",
+    "value_proposition": "複数のGitHubリポジトリを効率的に管理し、コンテキストスイッチを最小化することで開発者の生産性向上を実現"
+}
